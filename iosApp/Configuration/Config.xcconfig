@@ -1,0 +1,7 @@
+TEAM_ID=
+
+PRODUCT_NAME=iperf3KMP
+PRODUCT_BUNDLE_IDENTIFIER=edu.bu.cs683_jabramson_project.iperf3_network_tester.iperf3KMP$(TEAM_ID)
+
+CURRENT_PROJECT_VERSION=1
+MARKETING_VERSION=1.0
