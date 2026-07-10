@@ -22,8 +22,8 @@ kotlin {
 
     androidLibrary {
         namespace = "edu.bu.cs683_jabramson_project.iperf3_network_tester.shared"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        compileSdk = 36 //libs.versions.android.compileSdk.get().toInt()
+        minSdk = 26 //libs.versions.android.minSdk.get().toInt()
 
         compilerOptions {
             jvmTarget = JvmTarget.JVM_11

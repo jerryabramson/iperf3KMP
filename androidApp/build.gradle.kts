@@ -26,8 +26,8 @@ android {
 
     defaultConfig {
         applicationId = "edu.bu.cs683_jabramson_project.iperf3_network_tester"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk = 26 //libs.versions.android.minSdk.get().toInt()
+        targetSdk = 36 //libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
     }
