@@ -14,6 +14,12 @@ import androidx.lifecycle.viewModelScope
 //
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultDataInProgress
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.createResultData
+import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getAverage
+import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMaximum
+import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMedian
+import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMinimum
+import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getSampleSize
+import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getStandardDeviation
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester.runner.IperfTestManage
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getAverage
 //
@@ -29,6 +35,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDown
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.NonCancellable.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -109,7 +116,7 @@ data class UiExecutionData(
             parallelStreams = DefaultInputData.PARALLEL_STREAMS,
             skip = DefaultInputData.SKIP,
         ),
-    //val context: Context? = null,
+    val context: String = "", //Context? = null,
     val isDatabaseCreated: Boolean = false,
 )
 
@@ -142,7 +149,7 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //    /**
 //     * Initialize the UI state.
 //     */
-//    init {
+    init {
 //        Log.d(tag, "initialize UI state")
 //
 //        // Set up Room database and repository
@@ -154,44 +161,45 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //        resultDatabase = db
 //        resultDataRepository = ResultDataRepository(db.resultDataDao())
 //
-//        _uiInputDataStateFlow.update{
-//            it.copy(
-//                hostName = "",
-//                portNumber = -1,
-//                hostField = "",
-//                skip = -1,
-//                durationSecs = -1,
-//                parallelStreams= -1,
-//                timeout = -1,
-//                isForceFlush = DefaultInputData.FORCE_FLUSH,
-//                isReverse = DefaultInputData.IS_REVERSE,
-//                isDebugging = DefaultInputData.IS_DEBUGGING,
-//            )
-//        }
-//        _uiExecutionDataStateFlow.update {
-//            it.copy(
-//                outputLines = emptyList<String>().toMutableList(),
-//                errorLines = emptyList<String>().toMutableList(),
-//                iperf3Messages = emptyList<String>().toMutableList(),
-//                results = emptyList<String>().toMutableList(),
-//                latestLine = "",
-//                progress = 0f,
-//                isRunning = false,
-//                isFinished = false,
-//                isVerbose = false,
-//                isSaved = false,
-//                returnCode = 0,
-//                lastLine = "",
-//                bandWidth = "",
-//                resultNumber = -1,
-//                numberOfMessages = 0,
-//                resultDataInProgress = iperfManager.getCurrentLineResult(),
-//                isDatabaseCreated = false
-//
-//            )
-//        }
-//    }
-//
+        _uiInputDataStateFlow.update {
+            it.copy(
+                hostName = "",
+                portNumber = -1,
+                hostField = "",
+                skip = -1,
+                durationSecs = -1,
+                parallelStreams = -1,
+                timeout = -1,
+                isForceFlush = DefaultInputData.FORCE_FLUSH,
+                isReverse = DefaultInputData.IS_REVERSE,
+                isDebugging = DefaultInputData.IS_DEBUGGING,
+            )
+        }
+        _uiExecutionDataStateFlow.update {
+            it.copy(
+                outputLines = emptyList<String>().toMutableList(),
+                errorLines = emptyList<String>().toMutableList(),
+                iperf3Messages = emptyList<String>().toMutableList(),
+                results = emptyList<String>().toMutableList(),
+                latestLine = "",
+                progress = 0f,
+                isRunning = false,
+                isFinished = false,
+                isVerbose = false,
+                isSaved = false,
+                returnCode = 0,
+                lastLine = "",
+                bandWidth = "",
+                resultNumber = -1,
+                numberOfMessages = 0,
+                resultDataInProgress = ResultDataInProgress(), //.getCurrentLineResult(),
+                isDatabaseCreated = false
+
+            )
+        }
+    }
+
+    //
 //
 //
 //
@@ -200,57 +208,59 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //     * Callback to save an output line from the iperf3 binary.
 //     * @param resultDataInProgress The output line from the process execution.
 //     */
-//    fun saveOutputLine(resultDataInProgress: ResultDataInProgress, newMessage: Boolean = false) {
+    fun saveOutputLine(resultDataInProgress: ResultDataInProgress, newMessage: Boolean = false) {
 //        val lineResultStr = printLineResult(resultDataInProgress)
 //        Log.d(tag, "viewModel: saveOutputLine() -> $lineResultStr")
 //        val lastMessages = resultDataInProgress.messages.toMutableList()
 //
-//        if (newMessage) {
+        if (newMessage) {
 //            lastMessages.forEach { Log.d(tag, "lastMessages: $it") }
-//            _uiExecutionDataStateFlow.update {
-//                it.copy(
-//                    iperf3Messages = resultDataInProgress.messages.toMutableList(),
-//                    numberOfMessages = lastMessages.size,
-//                    resultDataInProgress =  resultDataInProgress
-//                )
-//            }
-//        } else {
-//            _uiExecutionDataStateFlow.update { it ->
-//                it.copy(
-//                    lastLine = it.latestLine,
-//                    bandWidth = resultDataInProgress.basicBandWidthString,
-//                    latestLine = resultDataInProgress.formattedOutputLine,
-//                    outputLines = it.outputLines.also {
-//                        if (resultDataInProgress.formattedOutputLine.isNotEmpty()) {
-//                            it.add(resultDataInProgress.formattedOutputLine)
-//                        }
-//                    },
-//                    resultNumber = resultDataInProgress.intervalNumber,
-//                    iperf3Messages = it.iperf3Messages.toMutableList(),
-//                    resultDataInProgress =  resultDataInProgress
-//                )
-//            }
+            _uiExecutionDataStateFlow.update {
+                it.copy(
+                    iperf3Messages = resultDataInProgress.messages.toMutableList(),
+                    numberOfMessages = 5, //lastMessages.size,
+                    resultDataInProgress = resultDataInProgress
+                )
+            }
+        } else {
+            _uiExecutionDataStateFlow.update { it ->
+                it.copy(
+                    lastLine = it.latestLine,
+                    bandWidth = resultDataInProgress.basicBandWidthString,
+                    latestLine = resultDataInProgress.formattedOutputLine,
+                    outputLines = it.outputLines.also {
+                        if (resultDataInProgress.formattedOutputLine.isNotEmpty()) {
+                            it.add(resultDataInProgress.formattedOutputLine)
+                        }
+                    },
+                    resultNumber = resultDataInProgress.intervalNumber,
+                    iperf3Messages = it.iperf3Messages.toMutableList(),
+                    resultDataInProgress = resultDataInProgress
+                )
+            }
 //
-//        }
-//    }
-//
+        }
+    }
+
+    //
 //    /**
 //     * Callback to save an error line from the iperf3 binary.
 //     * @param aLine The error line from the process execution.
 //     */
-//    fun saveErrorLine(resultDataInProgress: ResultDataInProgress, aLine: String = "") {
-//        Log.d(tag, "stderr: $aLine")
-//        _uiExecutionDataStateFlow.update { data ->
-//            data.copy(
-//                errorLines = data.errorLines.also { it.add(aLine) },
-//                resultDataInProgress = resultDataInProgress,
-//                latestLine = resultDataInProgress.rawOutputLine
-//            )
-//        }
-//    }
-//
+    fun saveErrorLine(resultDataInProgress: ResultDataInProgress, aLine: String = "") {
+        // Log.d(tag, "stderr: $aLine")
+        _uiExecutionDataStateFlow.update { data ->
+            data.copy(
+                errorLines = data.errorLines.also { it.add(aLine) },
+                resultDataInProgress = resultDataInProgress,
+                latestLine = resultDataInProgress.rawOutputLine
+            )
+        }
+    }
+
+    //
     fun launchOrCancel() {
-//        if (!_uiExecutionDataStateFlow.value.isRunning) launch() else cancel()
+        if (!_uiExecutionDataStateFlow.value.isRunning) launch() else cancel()
     }
 
     //
@@ -277,57 +287,59 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
     //    /**
 //     * Launch the iperf3 binary (notice that this is an asynchronous operation).
 //     */
-//    fun launch() {
-//        val tempHostName = _uiInputDataStateFlow.value.hostName.ifEmpty { DefaultInputData.HOST_NAME }
-//        val tempPortNumber =
-//            if (_uiInputDataStateFlow.value.portNumber == -1)
-//                DefaultInputData.PORT_NUMBER
-//            else _uiInputDataStateFlow.value.portNumber
-//        //val tempHostField = "${tempHostName}:${tempPortNumber}"
-//        _uiInputDataStateFlow.update {
-//            it.copy(
-//                // Ensure the user can see selections during the run
-//                hostName = tempHostName,
-//                portNumber = tempPortNumber,
-//                hostField = tempHostName,
-//                durationSecs = if (it.durationSecs == -1) DefaultInputData.DURATION else it.durationSecs,
-//                parallelStreams = if (it.parallelStreams == -1) DefaultInputData.PARALLEL_STREAMS else it.parallelStreams,
-//                skip = if (it.skip == -1) DefaultInputData.SKIP else it.skip,
-//                timeout = if (it.timeout == -1L) DefaultInputData.TIMEOUT else it.timeout,
-//                isForceFlush = it.isForceFlush,
-//                isReverse = it.isReverse,
-//                isDebugging = it.isDebugging
-//            )
-//        }
-//
-//        // Update the UI active running state with empty values for the start of the test.
-//        _uiExecutionDataStateFlow.update { it ->
-//            it.copy(isRunning = true,
-//                isFinished = false,
-//                outputLines = it.outputLines.also { it.clear() },
-//                errorLines = it.errorLines.also { it.clear() },
-//                iperf3Messages = it.iperf3Messages.also { it.clear() },
-//                results =  emptyList<String>().toMutableList(),
-//                bandWidth = "",
-//                latestLine = "",
-//                progress = 0f,
-//                lastLine = "",
-//                resultNumber = -1,
-//                returnCode =  0,
-//                isSaved =  false,
-//            )
-//
-//        }
-//
+    fun launch() {
+        val tempHostName = _uiInputDataStateFlow.value.hostName.ifEmpty { DefaultInputData.HOST_NAME }
+        val tempPortNumber =
+            if (_uiInputDataStateFlow.value.portNumber == -1)
+                DefaultInputData.PORT_NUMBER
+            else _uiInputDataStateFlow.value.portNumber
+        val tempHostField = "${tempHostName}:${tempPortNumber}"
+        _uiInputDataStateFlow.update {
+            it.copy(
+                // Ensure the user can see selections during the run
+                hostName = tempHostName,
+                portNumber = tempPortNumber,
+                hostField = tempHostName,
+                durationSecs = if (it.durationSecs == -1) DefaultInputData.DURATION else it.durationSecs,
+                parallelStreams = if (it.parallelStreams == -1) DefaultInputData.PARALLEL_STREAMS else it.parallelStreams,
+                skip = if (it.skip == -1) DefaultInputData.SKIP else it.skip,
+                timeout = if (it.timeout == -1L) DefaultInputData.TIMEOUT else it.timeout,
+                isForceFlush = it.isForceFlush,
+                isReverse = it.isReverse,
+                isDebugging = it.isDebugging
+            )
+        }
+
+        // Update the UI active running state with empty values for the start of the test.
+        _uiExecutionDataStateFlow.update { it ->
+            it.copy(
+                isRunning = true,
+                isFinished = false,
+                outputLines = it.outputLines.also { it.clear() },
+                errorLines = it.errorLines.also { it.clear() },
+                iperf3Messages = it.iperf3Messages.also { it.clear() },
+                results = emptyList<String>().toMutableList(),
+                bandWidth = "",
+                latestLine = "",
+                progress = 0f,
+                lastLine = "",
+                resultNumber = -1,
+                returnCode = 0,
+                isSaved = false,
+            )
+        }
+    }
+
+    //
 //
 //        /*
 //         * Launch the iperf3 binary asynchronously.
 //         * I decided to wrap the async launch in a separate function
 //         * to make the code more explicit.
 //         */
-//        Log.d(tag, "Async Launch Started")
-//        viewModelScope.launch {runIperf3() }
-//        Log.d(tag, "Async Launch Completed")
+    //Log.d(tag, "Async Launch Started")
+    //viewModelScope.launch {runIperf3() }
+    //Log.d(tag, "Async Launch Completed")
 //    }
 //
 //
@@ -337,154 +349,157 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //     * @param s The string to convert to an integer.
 //     * @return The integer value of the string, or 0 if invalid.
 //     */
-//    private fun myInt(s: String): Int {
-//        return if (s.isEmpty()) {
-//            0
-//        } else {
-//            try {
-//                s.toInt()
-//            } catch (_: Exception) {
-//                -1
-//            }
-//        }
-//    }
-//
+    fun myInt(s: String): Int {
+        return if (s.isEmpty()) {
+            0
+        } else {
+            try {
+                s.toInt()
+            } catch (_: Exception) {
+                -1
+            }
+        }
+    }
+
+    //
 //
     fun cancel() {
-//        Log.d(tag, "Async cancel Started")
-//        // Update the UI active running state with empty values for the start of the test.
-//        _uiExecutionDataStateFlow.update {
-//            it.copy(
-//                returnCode = -1,
-//                isRunning = false,
-//                isFinished = true
-//            )
-//        }
-//        _uiInputDataStateFlow.update{
-//            it.copy(
-//                // Only remember last choices for non-default user selections
-//                hostName =  if (it.hostName != DefaultInputData.HOST_NAME) it.hostName else "",
-//                hostField = if (it.hostField != DefaultInputData.HOST_FIELD) it.hostField else "",
-//                skip =  if (it.skip != DefaultInputData.SKIP) it.skip else -1,
-//                durationSecs = if (it.durationSecs != DefaultInputData.DURATION) it.durationSecs else -1,
-//                parallelStreams = if (it.parallelStreams != DefaultInputData.PARALLEL_STREAMS) it.parallelStreams else -1,
-//                portNumber = if (it.portNumber != DefaultInputData.PORT_NUMBER) it.portNumber else -1,
-//                isForceFlush = it.isForceFlush
-//            )
-//        }
+        //Log.d(tag, "Async cancel Started")
+        // Update the UI active running state with empty values for the start of the test.
+        _uiExecutionDataStateFlow.update {
+            it.copy(
+                returnCode = -1,
+                isRunning = false,
+                isFinished = true
+            )
+        }
+        _uiInputDataStateFlow.update {
+            it.copy(
+                // Only remember last choices for non-default user selections
+                hostName = if (it.hostName != DefaultInputData.HOST_NAME) it.hostName else "",
+                hostField = if (it.hostField != DefaultInputData.HOST_FIELD) it.hostField else "",
+                skip = if (it.skip != DefaultInputData.SKIP) it.skip else -1,
+                durationSecs = if (it.durationSecs != DefaultInputData.DURATION) it.durationSecs else -1,
+                parallelStreams = if (it.parallelStreams != DefaultInputData.PARALLEL_STREAMS) it.parallelStreams else -1,
+                portNumber = if (it.portNumber != DefaultInputData.PORT_NUMBER) it.portNumber else -1,
+                isForceFlush = it.isForceFlush
+            )
+        }
 //
 //        Log.d(tag, "Async Cancel Started")
-//        viewModelScope.launch {cancelTest() }
+        //viewModelScope.launch {cancelTest() }
 //        Log.d(tag, "Async Cancel Completed")
     }
 
     //
-//    fun cancelTest(): Int {
-//        var rc: Int
-//        try {
-//            rc = iperfManager.cancelTest()
-//        } catch (e: Exception) {
-//            /* Shouldn't ever get here, since guards are already in place */
-//            e(tag, "Failed to cancel iperf3: ${e.message}", e)
-//            saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to cancel iperf3: ${e.message}")
-//            rc = -1
-//        }
-//        return rc
-//    }
-//
+    fun cancelTest(): Int {
+        var rc: Int
+        try {
+            rc = -1 //iperfManager.cancelTest()
+        } catch (e: Exception) {
+            /* Shouldn't ever get here, since guards are already in place */
+            //e(tag, "Failed to cancel iperf3: ${e.message}", e)
+            saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to cancel iperf3: ${e.message}")
+            rc = -1
+        }
+        return rc
+    }
+
+    //
 //    /**
 //     * Run the iperf3 binary.
 //     * This must be a suspend function called from a coroutine.
 //     * @return The return code from the iperf3 binary.
 //     */
-//    suspend fun runIperf3(): Int {
-//        var rc: Int
-//        try {
-//            /**
-//             * Prepare to launch the iperf3 library as a suspended function.
-//             */
-//            updateProgress(0f)
-//            Log.d(tag, "sync iperfManager.startTest() starts")
-//            rc = iperfManager.startTest(
-//                _uiExecutionDataStateFlow.value.context,
-//                _uiInputDataStateFlow.value
-//            )
-//            Log.d(tag, "sync iperfManager.startTest() ends")
-//
-//            _uiExecutionDataStateFlow.update {
-//                it.copy(
-//                    resultDataInProgress = iperfManager.getCurrentLineResult(),
-//                    resultNumber = -1
-//                )
-//            }
-//        } catch (e: Exception) {
-//            /* Shouldn't ever get here, since guards are already in place */
-//            e(tag, "Failed to run iperf3: ${e.message}", e)
-//            saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to run iperf3: ${e.message}")
-//            rc = -1
-//        }
-//
-//
-//        //Update the UI state to show that the test is finished and
-//        // Provide the return code to the UI.
-//        if (rc != 0) {
-//            // Only need this on failure conditions
-//            _uiExecutionDataStateFlow.update { data -> data.copy(results = data.results.also { it.add("Error: Return Code = $rc") }) }
-//        }
-//        val outputCount = _uiExecutionDataStateFlow.value.resultDataInProgress.intervalNumber
-//        if (outputCount > 0) {
-//            val exe = getSampleSize(_uiExecutionDataStateFlow.value.resultDataInProgress)
-//            val max = getMaximum(_uiExecutionDataStateFlow.value.resultDataInProgress)
-//            val min = getMinimum(_uiExecutionDataStateFlow.value.resultDataInProgress)
-//            val avg = getAverage(_uiExecutionDataStateFlow.value.resultDataInProgress)
-//            val med = getMedian(_uiExecutionDataStateFlow.value.resultDataInProgress)
-//            val std = getStandardDeviation(_uiExecutionDataStateFlow.value.resultDataInProgress)
-//            //val src = getSource(_uiExecutionDataStateFlow.value.resultData)
-//            //val dest = getDest(_uiExecutionDataStateFlow.value.resultData)
-//            if (!exe.isEmpty())  _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(exe) }) }
-//            if (!max.isEmpty())  _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(max) }) }
-//            if (!min.isEmpty())  _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(min) }) }
-//            if (!avg.isEmpty())  _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(avg) }) }
-//            if (!med.isEmpty())  _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(med) }) }
-//            if (!std.isEmpty())  _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(std) }) }
-//        } else {
-//            _uiExecutionDataStateFlow.update { it ->  it.copy(results =  it.results.also { it.add ("No Results") }) }
-//        }
-//
-//
-//        // Provide the return code to the UI.
-//        // Clear the hostName field for the UI.
-//        _uiExecutionDataStateFlow.update {
-//            it.copy(
-//                returnCode = rc,
-//                isRunning = false,
-//                isFinished = true,
-//
-//                // Only remember last choices for non-default user selections
-//            )
-//        }
-//
-//        // This should have already been called as part of iperfManager.runTest(), but just in case
-//        completeTest()
-//
-//        Log.d(tag, "runIperf3 Completed, return code: $rc")
-//        return rc
-//    }
-//
-//    fun completeTest() {
-//        _uiInputDataStateFlow.update {
-//            it.copy(
-//                hostName =  if (it.hostName != DefaultInputData.HOST_NAME) it.hostName else "",
-//                hostField = if (it.hostField != DefaultInputData.HOST_FIELD) it.hostField else "",
-//                skip =  if (it.skip != DefaultInputData.SKIP) it.skip else -1,
-//                durationSecs = if (it.durationSecs != DefaultInputData.DURATION) it.durationSecs else -1,
-//                parallelStreams = if (it.parallelStreams != DefaultInputData.PARALLEL_STREAMS) it.parallelStreams else -1,
-//                portNumber = if (it.portNumber != DefaultInputData.PORT_NUMBER) it.portNumber else -1,
-//                isForceFlush = it.isForceFlush
-//            )
-//        }
-//    }
-//
+    suspend fun runIperf3(): Int {
+        var rc: Int
+        // try {
+        /**
+         * Prepare to launch the iperf3 library as a suspended function.
+         */
+        //updateProgress(0f)
+        //Log.d(tag, "sync iperfManager.startTest() starts")
+        rc = -1 //iperfManager.startTest(
+        //_uiExecutionDataStateFlow.value.context,
+        //_uiInputDataStateFlow.value
+        //)
+        //Log.d(tag, "sync iperfManager.startTest() ends")
+
+        _uiExecutionDataStateFlow.update {
+            it.copy(
+                //resultDataInProgress = //iperfManager.getCurrentLineResult(),
+                resultNumber = -1
+            )
+        }
+        //} catch (e: Exception) {
+        /* Shouldn't ever get here, since guards are already in place */
+        //e(tag, "Failed to run iperf3: ${e.message}", e)
+        //  saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to run iperf3: ${e.message}")
+        //rc = -1
+        //}
+
+
+        //Update the UI state to show that the test is finished and
+        // Provide the return code to the UI.
+        if (rc != 0) {
+            // Only need this on failure conditions
+            _uiExecutionDataStateFlow.update { data -> data.copy(results = data.results.also { it.add("Error: Return Code = $rc") }) }
+        }
+        val outputCount = _uiExecutionDataStateFlow.value.resultDataInProgress.intervalNumber
+        if (outputCount > 0) {
+            val exe = getSampleSize(_uiExecutionDataStateFlow.value.resultDataInProgress)
+            val max = getMaximum(_uiExecutionDataStateFlow.value.resultDataInProgress)
+            val min = getMinimum(_uiExecutionDataStateFlow.value.resultDataInProgress)
+            val avg = getAverage(_uiExecutionDataStateFlow.value.resultDataInProgress)
+            val med = getMedian(_uiExecutionDataStateFlow.value.resultDataInProgress)
+            val std = getStandardDeviation(_uiExecutionDataStateFlow.value.resultDataInProgress)
+            //val src = getSource(_uiExecutionDataStateFlow.value.resultData)
+            //val dest = getDest(_uiExecutionDataStateFlow.value.resultData)
+            if (!exe.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(exe) }) }
+            if (!max.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(max) }) }
+            if (!min.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(min) }) }
+            if (!avg.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(avg) }) }
+            if (!med.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(med) }) }
+            if (!std.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(std) }) }
+        } else {
+            _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add("No Results") }) }
+        }
+
+
+        // Provide the return code to the UI.
+        // Clear the hostName field for the UI.
+        _uiExecutionDataStateFlow.update {
+            it.copy(
+                returnCode = rc,
+                isRunning = false,
+                isFinished = true,
+
+                // Only remember last choices for non-default user selections
+            )
+        }
+
+        // This should have already been called as part of iperfManager.runTest(), but just in case
+        //completeTest()
+
+        //Log.d(tag, "runIperf3 Completed, return code: $rc")
+        return rc
+    }
+
+    fun completeTest() {
+        _uiInputDataStateFlow.update {
+            it.copy(
+                hostName = if (it.hostName != DefaultInputData.HOST_NAME) it.hostName else "",
+                hostField = if (it.hostField != DefaultInputData.HOST_FIELD) it.hostField else "",
+                skip = if (it.skip != DefaultInputData.SKIP) it.skip else -1,
+                durationSecs = if (it.durationSecs != DefaultInputData.DURATION) it.durationSecs else -1,
+                parallelStreams = if (it.parallelStreams != DefaultInputData.PARALLEL_STREAMS) it.parallelStreams else -1,
+                portNumber = if (it.portNumber != DefaultInputData.PORT_NUMBER) it.portNumber else -1,
+                isForceFlush = it.isForceFlush
+            )
+        }
+    }
+
+    //
 //    /**
 //     * Callback to update the progress bar.
 //     * @param newProgress The new progress value.
@@ -492,31 +507,32 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //     * If uploading, the progress bar goes from 0.0 to 1.0 [left to right]
 //     * If downloading, the progress bar goes from 1.0 to 0.0 [right to left]
 //     */
-//    fun updateProgress(newProgress: Float) {
-//        val normalizedProgress = if (!_uiInputDataStateFlow.value.isReverse) newProgress else 1.0f - newProgress
-//        _uiExecutionDataStateFlow.update {
-//            it.copy(progress = normalizedProgress)
-//        }
-//    }
-//
+    fun updateProgress(newProgress: Float) {
+        val normalizedProgress = if (!_uiInputDataStateFlow.value.isReverse) newProgress else 1.0f - newProgress
+        _uiExecutionDataStateFlow.update {
+            it.copy(progress = normalizedProgress)
+        }
+    }
+
+    //
 //    /**
 //     * User entered a new host name.
 //     * @param hostField The new host name.
 //     */
     fun updateHostName(hostField: String) {
-//        // Reset to base state if user clears field
-//        if (!hostField.isEmpty()) {
-//            _uiInputDataStateFlow.update {
-//                it.copy(
-//                    hostField = hostField,
-//                    hostName = hostField
-//                )
-//            }
-//        } else {
-//            _uiInputDataStateFlow.update {
-//                it.copy(hostField = "", hostName = "")
-//            }
-//        }
+        // Reset to base state if user clears field
+        if (!hostField.isEmpty()) {
+            _uiInputDataStateFlow.update {
+                it.copy(
+                    hostField = hostField,
+                    hostName = hostField
+                )
+            }
+        } else {
+            _uiInputDataStateFlow.update {
+                it.copy(hostField = "", hostName = "")
+            }
+        }
     }
 
     //
@@ -527,19 +543,19 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //     * @param portNumber new port number
 //     */
     fun setPortNumber(portNumber: String) {
-//        val d: Int
-//        var newPortNumber = _uiInputDataStateFlow.value.portNumber // default to existing value
-//        if (!portNumber.isEmpty())
-//            try {
-//                d = portNumber.toInt()
-//                newPortNumber = d
-//            } catch (_: Exception) { /**/
-//        } else {
-//            newPortNumber = -1
-//        }
-//        _uiInputDataStateFlow.update {
-//            it.copy(portNumber = newPortNumber)
-//        }
+        val d: Int
+        var newPortNumber = _uiInputDataStateFlow.value.portNumber // default to existing value
+        if (!portNumber.isEmpty())
+            try {
+                d = portNumber.toInt()
+                newPortNumber = d
+            } catch (_: Exception) { /**/
+            } else {
+            newPortNumber = -1
+        }
+        _uiInputDataStateFlow.update {
+            it.copy(portNumber = newPortNumber)
+        }
     }
 
     //
@@ -550,19 +566,20 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //     * @param duration The new value for duration.
 //     */
     fun setDuration(duration: String) {
-//        val d: Int
-//        var newDuration = _uiInputDataStateFlow.value.durationSecs // default to existing value
-//        if (!duration.isEmpty()) {
-//            try {
-//                d = duration.toInt()
-//                newDuration = d
-//            } catch (_: Exception) { /**/ }
-//        } else {
-//            newDuration = -1
-//        }
-//        _uiInputDataStateFlow.update {
-//            it.copy(durationSecs = newDuration)
-//        }
+        val d: Int
+        var newDuration = _uiInputDataStateFlow.value.durationSecs // default to existing value
+        if (!duration.isEmpty()) {
+            try {
+                d = duration.toInt()
+                newDuration = d
+            } catch (_: Exception) { /**/
+            }
+        } else {
+            newDuration = -1
+        }
+        _uiInputDataStateFlow.update {
+            it.copy(durationSecs = newDuration)
+        }
     }
 
     //
@@ -573,19 +590,20 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //     * @param skip The new value for omitted.
 //     */
     fun setSkip(skip: String) {
-//        val d: Int
-//        var newSkip = _uiInputDataStateFlow.value.skip // default to existing value
-//        if (!skip.isEmpty()) {
-//            try {
-//                d = skip.toInt()
-//                newSkip = d
-//            } catch (_: Exception) { /**/ }
-//        } else {
-//            newSkip = DefaultInputData.SKIP
-//        }
-//        _uiInputDataStateFlow.update {
-//            it.copy(skip = newSkip)
-//        }
+        val d: Int
+        var newSkip = _uiInputDataStateFlow.value.skip // default to existing value
+        if (!skip.isEmpty()) {
+            try {
+                d = skip.toInt()
+                newSkip = d
+            } catch (_: Exception) { /**/
+            }
+        } else {
+            newSkip = DefaultInputData.SKIP
+        }
+        _uiInputDataStateFlow.update {
+            it.copy(skip = newSkip)
+        }
     }
 
     //
@@ -596,15 +614,15 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //     * @param str The new value for parallel streams.
 //     */
     fun setParallelStreams(str: String) {
-//        // default to existing value
-//        val newStreams: Int = if (!str.isEmpty()) {
-//            myInt(str)
-//        } else {
-//            DefaultInputData.PARALLEL_STREAMS
-//        }
-//        _uiInputDataStateFlow.update {
-//            it.copy(parallelStreams = newStreams)
-//        }
+        // default to existing value
+        val newStreams: Int = if (!str.isEmpty()) {
+            myInt(str)
+        } else {
+            DefaultInputData.PARALLEL_STREAMS
+        }
+        _uiInputDataStateFlow.update {
+            it.copy(parallelStreams = newStreams)
+        }
     }
 
     //
@@ -618,46 +636,36 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
         }
     }
 
+
     //
 //    /**
 //     * User entered a new force flush.
 //     * @param forceFlush The new value for forceflush.
 //     */
     fun setForceFlush(forceFlush: Boolean) {
-//        _uiInputDataStateFlow.update {
-//            it.copy(isForceFlush = forceFlush)
-//        }
+        _uiInputDataStateFlow.update {
+            it.copy(isForceFlush = forceFlush)
+        }
     }
 
     //
-    fun setContext(context: String) { //Context) {
-//        _uiExecutionDataStateFlow.update {
-//            it.copy(context = context)
-//        }
-//        if (!_uiExecutionDataStateFlow.value.isDatabaseCreated) {
-//            resultDatabase =
-//                Room.databaseBuilder(
-//                    context, ResultDatabase::class.java,
-//                    ResultDatabase.DBNAME
-//                ).fallbackToDestructiveMigration(true)
-//                    .build()
-//            _uiExecutionDataStateFlow.update {
-//                it.copy(isDatabaseCreated = true)
-//
-//            }
-//        }
+    fun setContext(context: String) {  //Context) {
+        _uiExecutionDataStateFlow.update {
+            it.copy(context = context)
+        }
     }
-//
+
     fun toggleDebug() {
-//        val newState = !_uiInputDataStateFlow.value.isDebugging
-//        _uiInputDataStateFlow.update {
-//            it.copy(isDebugging = newState)
-//        }
-//
+        val newState = !_uiInputDataStateFlow.value.isDebugging
+        _uiInputDataStateFlow.update {
+            it.copy(isDebugging = newState)
+        }
     }
-//}
-//
 }
+
+
+
+
 
 
 

@@ -2,23 +2,26 @@
 
 ## Project structure
 
-- **3 modules:** `:shared` (KMP source), `:androidApp`, `:desktopApp`
-- All shared code lives in `shared/src/`. Target folders: `commonMain`, `androidMain`, `iosMain`, `jvmMain`
-- iOS app entry: `iosApp/iosApp/` (opened in Xcode, never run via Gradle)
-- Gradle version: **9.1.0** (wrapper present). Use `./gradlew` — never system `gradle`
+- **3 modules:** `:shared` (KMP library), `:androidApp` (Android app), `:desktopApp` (JVM desktop app)
+- Shared code in `shared/src/`. Source sets: `commonMain`, `commonTest`, `androidMain`, `androidHostTest`, `iosMain`, `iosTest`, `jvmMain`, `jvmTest`
+- iOS app entry: `iosApp/iosApp.xcodeproj` (open in Xcode, never build via Gradle)
+- Gradle **9.6.1** (wrapper present). Use `./gradlew` — never system `gradle`
+- Root project name: `iperf3KMP` (`settings.gradle.kts`)
 
 ## Key commands
 
+- Desktop run: `./gradlew :desktopApp:run`
+- Desktop hot reload: `./gradlew :desktopApp:hotRun --auto`
 - Build debug APK: `./gradlew :androidApp:assembleDebug`
-- Desktop run: `./gradlew :desktopApp:run` (or `:desktopApp:hotRun --auto` for hot reload)
-- iOS: open `iosApp/iosApp/iosApp.xcodeproj` in Xcode
-- Tests: `./gradlew :shared:jvmTest` (desktop), `./gradlew :shared:testAndroidHostTest` (Android)
-- `:shared:iosSimulatorArm64Test` for iOS simulator tests
+- Desktop tests: `./gradlew :shared:jvmTest`
+- Android host tests: `./gradlew :shared:testAndroidHostTest`
+- iOS simulator tests: `./gradlew :shared:iosSimulatorArm64Test`
 
 ## Gotchas
 
-- **No unit tests exist yet** — the shared module has no `test/` source sets. Adding tests requires creating `testAndroidHostTest` or `jvmTest` source directories and corresponding build config.
-- iOS target is `iosSimulatorArm64` only — no physical device target configured in `build.gradle.kts`.
-- The project uses foojay-resolver plugin for toolchain auto-provisioning (no manual JDK install needed).
-- Compose Multiplatform 1.7.x (alpha) — API surface differs from stable Compose for Android. Check `libs.versions.toml` for exact versions.
-- Don't edit `iosApp/` Gradle files — iOS build is managed entirely by Xcode project.
+- Desktop main class: `edu.bu.cs683_jabramson_project.iperf3_network_tester.MainKt` (`desktopApp/build.gradle.kts:20`)
+- Shared module targets **both** `iosArm64()` and `iosSimulatorArm64()` (`shared/build.gradle.kts:12-13`)
+- Compose Multiplatform **1.11.1** (check `gradle/libs.versions.toml` for exact versions)
+- foojay-resolver plugin auto-provisions JDK (no manual install needed)
+- Don't edit `iosApp/` Gradle files — iOS build is managed entirely by Xcode
+- Android minSdk is **26**, compileSdk/targetSdk is **36**

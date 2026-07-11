@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.Iperf3NetworkTesterTheme
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.view.RunIperf3Screen
@@ -23,31 +24,13 @@ import iperf3kmp.shared.generated.resources.Res
 import iperf3kmp.shared.generated.resources.compose_multiplatform
 
 @Composable
-@Preview
+@Preview(name = "App",
+    showBackground = true,
+    device =  Devices.PIXEL_6,
+    showSystemUi = true)
+
 fun App() {
     Iperf3NetworkTesterTheme {
-//        var showContent by remember { mutableStateOf(false) }
         RunIperf3Screen(viewModel = Iperf3RunViewModel())
-//        Column(
-//            modifier = Modifier
-//                .background(MaterialTheme.colorScheme.primaryContainer)
-//                .safeContentPadding()
-//                .fillMaxSize(),
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//        ) {
-//            Button(onClick = { showContent = !showContent }) {
-//                Text("Click me!")
-//            }
-//            AnimatedVisibility(showContent) {
-//                val greeting = remember { Greeting().greet() }
-//                Column(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalAlignment = Alignment.CenterHorizontally,
-//                ) {
-//                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-//                    Text("Compose: $greeting")
-//                }
-//            }
-//        }
     }
 }

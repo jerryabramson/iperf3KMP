@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 //import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 //import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 //import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,10 +34,15 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.Iperf3RunV
 
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
+@Preview(name = "Iperf3Screen",
+    showBackground = true,
+    device =  Devices.PIXEL_9_PRO,
+    showSystemUi = true)
 @Composable
 //fun RunIperf3Screen(viewModel: Iperf3RunViewModel)
-fun RunIperf3Screen(viewModel: Iperf3RunViewModel)   //= hiltViewModel(
+fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= hiltViewModel(
 //    checkNotNull(
 //        LocalViewModelStoreOwner.current
 //    )
@@ -47,11 +53,11 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel)   //= hiltViewModel(
 {
     val uiExecutionState by viewModel.uiExecutionDataStateFlow.collectAsState()
     val uiInputState by viewModel.uiInputDataStateFlow.collectAsState()
-
     val monoStyle = mesloMonoTextStyle()
     val fieldColors = textFieldColors()
     val context = "foo" //LocalContext.current
-    viewModel.setContext(context)
+
+    //viewModel.setContext(context)
 
 
     Scaffold(
@@ -105,9 +111,7 @@ fun mesloMonoTextStyle(): TextStyle = TextStyle(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "Iperf3Screen",
     showBackground = true,
-    //device =  Devices.PIXEL_9_PRO,
-     device = Devices.PIXEL_6_PRO,
-    //device = "spec:width=411dp,height=891dp",
+    device =  Devices.PIXEL_9_PRO,
     showSystemUi = true)
 @Composable
 fun PreviewIperf3Screen() {
