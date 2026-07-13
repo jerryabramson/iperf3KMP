@@ -104,3 +104,34 @@ To refresh icons from the source project or a new source:
 3. Update `androidApp/src/main/res/values/ic_launcher_background.xml` if the background color changes
 4. Replace `iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-512.png` and update `Contents.json` filename field if renamed
 5. Replace `desktopApp/src/main/resources/app-icon.png` — no config change needed unless the filename changes
+
+## stubbedexec branch changes
+
+### Iperf3RunViewModel (`shared/src/commonMain/.../viewmodel/Iperf3RunViewModel.kt`)
+
+- Class now extends `ViewModel` (was a plain class)
+- Added `myInt(s: String, o: Int): Int` — returns parsed int or fallback default `o`
+- `runIperf3()` stubbed with simulated test loop:
+  - 18 iterations, delays of 400ms (first 4) and 1s (remaining)
+  - Mock `iperf3Messages` and `outputLines` from `getSampleUiState()`
+  - Progress increments by 0.1 per iteration
+  - Return code = `p * 10` rounded to int
+- `cancel()` refactored to call `completeTest()` instead of inline state reset
+- Renamed methods:
+  - `toggleUploadDownload()` → `setUploadDownload()`
+  - `updateHostName()` → `seHostName()` (note: typo preserved)
+- Updated `setPortNumber()`, `setDuration()`, `setSkip()`, `setParallelStreams()` to use `myInt()` helper
+- Added `setContext(context: String)` — called at start of composable view
+- Added `toggleDebug()` — toggles debug mode via "show iperf3 output" button
+
+### Iperf3View (`shared/src/commonMain/.../view/Iperf3View.kt`)
+
+- Updated callback references to match renamed viewmodel methods
+- Removed unused `viewModel` import
+
+### UnitConverter (`shared/src/commonMain/.../utils/UnitConverter.kt`)
+
+- Fixed string interpolation in `toIntString()` — `${unitConvertedData.value.toInt()}` instead of `$unitConvertedData.value.toInt())`
+- Fixed string interpolation in `toWholeNumber()` — `${unitConvertedData.value} ${unitConvertedData.unit}`
+- Reformatted `fromHumanUnit()` — moved `rawBitsPerSec` into `when` block body, added early return
+- Reformatted `truncateDouble()` — moved inner `if/else` body into block
