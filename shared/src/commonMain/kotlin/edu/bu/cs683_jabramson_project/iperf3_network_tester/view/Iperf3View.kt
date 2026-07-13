@@ -23,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 //import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 //import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 //import androidx.lifecycle.viewmodel.compose.viewModel
@@ -74,8 +73,8 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= 
                 uiState = uiExecutionState,
                 inputState = uiInputState,
                 isRunning =  uiExecutionState.isRunning,
-                uploadDownload = viewModel::toggleUploadDownload,
-                updateHostName =  viewModel::updateHostName,
+                uploadDownload = viewModel::setUploadDownload,
+                updateHostName =  viewModel::seHostName,
                 launch =  viewModel::launchOrCancel,
                 setDuration = viewModel::setDuration,
                 setPortNumber = viewModel::setPortNumber,

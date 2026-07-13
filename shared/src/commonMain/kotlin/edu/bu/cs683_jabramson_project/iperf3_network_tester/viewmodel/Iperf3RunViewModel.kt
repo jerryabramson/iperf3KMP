@@ -1,25 +1,28 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel
 
 
-
+import androidx.collection.emptyLongSet
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 //import android.app.Application
 //import android.content.Context
 //import android.util.Log
 //import android.util.Log.e
 //import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 //import androidx.room.Room
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester.database.ResultDataRepository
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester.database.ResultDatabase
 //
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultDataInProgress
-import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.createResultData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getAverage
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMaximum
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMedian
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMinimum
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getSampleSize
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getStandardDeviation
+import edu.bu.cs683_jabramson_project.iperf3_network_tester.view.SampleUIData
+import edu.bu.cs683_jabramson_project.iperf3_network_tester.view.getSampleUiState
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester.runner.IperfTestManage
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getAverage
 //
@@ -31,17 +34,27 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getStandardDev
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getStandardDeviation
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.printLineResult
 import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.isDownload
-
-
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.NonCancellable.cancel
+import kotlinx.coroutines.NonCancellable.start
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
+import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 
 object UploadDownload {
@@ -126,8 +139,8 @@ data class UiExecutionData(
  *
   */
 
-class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(application) {
-{
+class Iperf3RunViewModel() : ViewModel() {
+
     val tag = "Iperf3RunViewModel"
 
     private val _uiExecutionDataStateFlow = MutableStateFlow(UiExecutionData())
@@ -136,6 +149,8 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
     //
     private val _uiInputDataStateFlow = MutableStateFlow(UiInputData())
     val uiInputDataStateFlow: StateFlow<UiInputData> = _uiInputDataStateFlow.asStateFlow()
+
+
 
     //
 //    private var iperfManager: IperfTestManage = IperfTestManage(
@@ -284,9 +299,9 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //        }
     }
 
-    //    /**
-//     * Launch the iperf3 binary (notice that this is an asynchronous operation).
-//     */
+    /**
+     * Launch the iperf3 binary (notice that this is an asynchronous operation).
+     */
     fun launch() {
         val tempHostName = _uiInputDataStateFlow.value.hostName.ifEmpty { DefaultInputData.HOST_NAME }
         val tempPortNumber =
@@ -328,44 +343,35 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
                 isSaved = false,
             )
         }
+        /*
+       * Launch the iperf3 binary asynchronously.
+       * I decided to wrap the async launch in a separate function
+       * to make the code more explicit.
+       */
+//     Log.d(tag, "Async Launch Started")
+
+
+        viewModelScope.launch { runIperf3() }
+//      Log.d(tag, "Async Launch Completed")
     }
 
-    //
 //
-//        /*
-//         * Launch the iperf3 binary asynchronously.
-//         * I decided to wrap the async launch in a separate function
-//         * to make the code more explicit.
-//         */
-    //Log.d(tag, "Async Launch Started")
-    //viewModelScope.launch {runIperf3() }
-    //Log.d(tag, "Async Launch Completed")
-//    }
-//
-//
-//    /**
-//     * I had some issues with `NumberFormatException` at odd times during
-//     * testing, so I wrapped this in a try/catch.
-//     * @param s The string to convert to an integer.
-//     * @return The integer value of the string, or 0 if invalid.
-//     */
-    fun myInt(s: String): Int {
-        return if (s.isEmpty()) {
-            0
-        } else {
-            try {
-                s.toInt()
-            } catch (_: Exception) {
-                -1
-            }
-        }
-    }
+    /**
+     * Return a valid number or reset to base  state if it is
+     * either empty, or an invalid number.
+     * @param s The string to convert to an integer.
+     * @return The integer value of the string, or -1 if invalid or empty.
+     */
+    fun myInt(s: String, o: Int): Int = if (s.isEmpty() || s.equals("0")) { -1 } else { try { s.toInt() } catch (e: Exception) { o } }
 
-    //
-//
+    /**
+     * Cancel the running test. It is important to give the running iperf3
+     * threads the mechanism to exit cleanly, but telling the remote iperf3
+     * server that the connection should be closed.
+     * Otherwise, the server stays in the busy state for an indeterminate duration.
+     */
     fun cancel() {
         //Log.d(tag, "Async cancel Started")
-        // Update the UI active running state with empty values for the start of the test.
         _uiExecutionDataStateFlow.update {
             it.copy(
                 returnCode = -1,
@@ -373,22 +379,10 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
                 isFinished = true
             )
         }
-        _uiInputDataStateFlow.update {
-            it.copy(
-                // Only remember last choices for non-default user selections
-                hostName = if (it.hostName != DefaultInputData.HOST_NAME) it.hostName else "",
-                hostField = if (it.hostField != DefaultInputData.HOST_FIELD) it.hostField else "",
-                skip = if (it.skip != DefaultInputData.SKIP) it.skip else -1,
-                durationSecs = if (it.durationSecs != DefaultInputData.DURATION) it.durationSecs else -1,
-                parallelStreams = if (it.parallelStreams != DefaultInputData.PARALLEL_STREAMS) it.parallelStreams else -1,
-                portNumber = if (it.portNumber != DefaultInputData.PORT_NUMBER) it.portNumber else -1,
-                isForceFlush = it.isForceFlush
-            )
-        }
-//
-//        Log.d(tag, "Async Cancel Started")
-        //viewModelScope.launch {cancelTest() }
-//        Log.d(tag, "Async Cancel Completed")
+        completeTest()
+//      Log.d(tag, "Async Cancel Started")
+//      viewModelScope.launch {cancelTest() }
+//      Log.d(tag, "Async Cancel Completed")
     }
 
     //
@@ -412,31 +406,63 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
 //     * @return The return code from the iperf3 binary.
 //     */
     suspend fun runIperf3(): Int {
-        var rc: Int
-        // try {
-        /**
-         * Prepare to launch the iperf3 library as a suspended function.
-         */
-        //updateProgress(0f)
-        //Log.d(tag, "sync iperfManager.startTest() starts")
-        rc = -1 //iperfManager.startTest(
-        //_uiExecutionDataStateFlow.value.context,
-        //_uiInputDataStateFlow.value
-        //)
-        //Log.d(tag, "sync iperfManager.startTest() ends")
+        var rc: Int = 0
+        var r: ResultDataInProgress = ResultDataInProgress()
+        r.intervalNumber = 0
+         try {
+             /**
+              * Prepare to launch the iperf3 library as a suspended function.
+              */
+             var p: Float = 0.0.toFloat()
+             var iter = 0
+             updateProgress(0f)
+             while (iter++ < 18) {
+                 if (iter < 4) {
+                     delay(400.milliseconds)
+                     r.messages.add(getSampleUiState().iperf3Messages[iter])
+                     _uiExecutionDataStateFlow.update {
+                         it.copy(
+                             iperf3Messages = r.messages,
+                             resultDataInProgress = r,
+                             latestLine = ""
+                         )
+                     }
+                 } else {
+                     delay(1.seconds)
+                     p += 0.1.toFloat()
+                     updateProgress(p)
+                     r.basicBandWidthString = getSampleUiState().outputLines[r.intervalNumber.toInt() % getSampleUiState().outputLines.count()]
+                     r.intervalNumber++
+                     _uiExecutionDataStateFlow.update { data ->
+                         data.copy(
+                             latestLine = r.basicBandWidthString,
+                             resultDataInProgress = r,
+                             bandWidth = "Some results",
+                             outputLines = data.outputLines.also { it.add(r.basicBandWidthString) }
+                         )
+                     }
+                 }
 
-        _uiExecutionDataStateFlow.update {
-            it.copy(
-                //resultDataInProgress = //iperfManager.getCurrentLineResult(),
-                resultNumber = -1
-            )
+             }
+             rc = (p * 10).roundToInt()
+             //Log.d(tag, "sync iperfManager.startTest() starts")
+             //_uiExecutionDataStateFlow.value.context,
+             //_uiInputDataStateFlow.value
+             //)
+             //Log.d(tag, "sync iperfManager.startTest() ends")
+
+             _uiExecutionDataStateFlow.update {
+                 it.copy(
+                     //resultDataInProgress = //iperfManager.getCurrentLineResult(),
+                     resultNumber = -1
+                 )
+             }
+        } catch (e: Exception) {
+             /* Shouldn't ever get here, since guards are already in place */
+             //e(tag, "Failed to run iperf3: ${e.message}", e)
+             //  saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to run iperf3: ${e.message}")
+             rc = -1
         }
-        //} catch (e: Exception) {
-        /* Shouldn't ever get here, since guards are already in place */
-        //e(tag, "Failed to run iperf3: ${e.message}", e)
-        //  saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to run iperf3: ${e.message}")
-        //rc = -1
-        //}
 
 
         //Update the UI state to show that the test is finished and
@@ -500,13 +526,13 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
     }
 
     //
-//    /**
-//     * Callback to update the progress bar.
-//     * @param newProgress The new progress value.
-//     * We implement the progress bar as a floating point value between 0.0 and 1.0.
-//     * If uploading, the progress bar goes from 0.0 to 1.0 [left to right]
-//     * If downloading, the progress bar goes from 1.0 to 0.0 [right to left]
-//     */
+    /**
+     * Callback to update the progress bar.
+     * @param newProgress The new progress value.
+     * We implement the progress bar as a floating point value between 0.0 and 1.0.
+     * If uploading, the progress bar goes from 0.0 to 1.0 [left to right]
+     * If downloading, the progress bar goes from 1.0 to 0.0 [right to left]
+     */
     fun updateProgress(newProgress: Float) {
         val normalizedProgress = if (!_uiInputDataStateFlow.value.isReverse) newProgress else 1.0f - newProgress
         _uiExecutionDataStateFlow.update {
@@ -514,13 +540,11 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
         }
     }
 
-    //
-//    /**
-//     * User entered a new host name.
-//     * @param hostField The new host name.
-//     */
-    fun updateHostName(hostField: String) {
-        // Reset to base state if user clears field
+    /**
+     * User entered a new host name.
+     * @param hostField The new host name.
+     */
+    fun seHostName(hostField: String) {
         if (!hostField.isEmpty()) {
             _uiInputDataStateFlow.update {
                 it.copy(
@@ -529,132 +553,94 @@ class Iperf3RunViewModel() // application: Application) // : AndroidViewModel(ap
                 )
             }
         } else {
+            // Reset to base state if user clears field
             _uiInputDataStateFlow.update {
                 it.copy(hostField = "", hostName = "")
             }
         }
     }
 
-    //
-//    /**
-//     * User entered a new duration.
-//     * Notice that we do not allow changes to the user interface
-//     * if the resulting number is invalid.
-//     * @param portNumber new port number
-//     */
+    /**
+     * User entered a new duration.
+     * Notice that we do not allow changes to the user interface
+     * if the resulting number is invalid.
+     * @param portNumber new port number
+     */
     fun setPortNumber(portNumber: String) {
-        val d: Int
-        var newPortNumber = _uiInputDataStateFlow.value.portNumber // default to existing value
-        if (!portNumber.isEmpty())
-            try {
-                d = portNumber.toInt()
-                newPortNumber = d
-            } catch (_: Exception) { /**/
-            } else {
-            newPortNumber = -1
-        }
         _uiInputDataStateFlow.update {
-            it.copy(portNumber = newPortNumber)
+            it.copy(portNumber = myInt(portNumber, _uiInputDataStateFlow.value.portNumber))
         }
     }
 
-    //
-//    /**
-//     * User entered a new duration.
-//     * Notice that we do not allow changes to the user interface
-//     * if the resulting number is invalid.
-//     * @param duration The new value for duration.
-//     */
+    /**
+     * User entered a new duration.
+     * Notice that we do not allow changes to the user interface
+     * if the resulting number is invalid.
+     * @param duration The new value for duration.
+     */
     fun setDuration(duration: String) {
-        val d: Int
-        var newDuration = _uiInputDataStateFlow.value.durationSecs // default to existing value
-        if (!duration.isEmpty()) {
-            try {
-                d = duration.toInt()
-                newDuration = d
-            } catch (_: Exception) { /**/
-            }
-        } else {
-            newDuration = -1
-        }
         _uiInputDataStateFlow.update {
-            it.copy(durationSecs = newDuration)
+            it.copy(durationSecs = myInt(duration, _uiInputDataStateFlow.value.durationSecs))
         }
     }
 
-    //
-//    /**
-//     * The user entered a new value for the omitted field.
-//     * Notice that we do not allow changes to the user interface
-//     * if the resulting number is invalid.
-//     * @param skip The new value for omitted.
-//     */
+    /**
+     * The user entered a new value for the omitted field.
+     * Notice that we do not allow changes to the user interface
+     * if the resulting number is invalid.
+     * @param skip The new value for omitted.
+     */
     fun setSkip(skip: String) {
-        val d: Int
-        var newSkip = _uiInputDataStateFlow.value.skip // default to existing value
-        if (!skip.isEmpty()) {
-            try {
-                d = skip.toInt()
-                newSkip = d
-            } catch (_: Exception) { /**/
-            }
-        } else {
-            newSkip = DefaultInputData.SKIP
-        }
         _uiInputDataStateFlow.update {
-            it.copy(skip = newSkip)
+            it.copy(skip = myInt(skip, _uiInputDataStateFlow.value.skip))
         }
     }
 
-    //
-//    /**
-//     * User entered a new value for parallel streams.
-//     * Notice that we do not allow changes to the user interface
-//     * if the resulting number is invalid.
-//     * @param str The new value for parallel streams.
-//     */
+    /**
+     * User entered a new value for parallel streams.
+     * Notice that we do not allow changes to the user interface
+     * if the resulting number is invalid.
+     * @param str The new value for parallel streams.
+     */
     fun setParallelStreams(str: String) {
-        // default to existing value
-        val newStreams: Int = if (!str.isEmpty()) {
-            myInt(str)
-        } else {
-            DefaultInputData.PARALLEL_STREAMS
-        }
         _uiInputDataStateFlow.update {
-            it.copy(parallelStreams = newStreams)
+            it.copy(parallelStreams = myInt(str, _uiInputDataStateFlow.value.parallelStreams))
         }
     }
 
-    //
-//    /**
-//     * User entered a new upload/download.
-//     * @param str The new value for upload/download.
-//     */
-    fun toggleUploadDownload(str: String) {
+    /**
+     * User chose radio button for upload/download.
+     * @param str The new value for upload/download.
+     */
+    fun setUploadDownload(str: String) {
         _uiInputDataStateFlow.update {
             it.copy(isReverse = isDownload(str))
         }
     }
 
 
-    //
-//    /**
-//     * User entered a new force flush.
-//     * @param forceFlush The new value for forceflush.
-//     */
+    /**
+     * User toggled force flush.
+     * @param forceFlush The new value for forceflush.
+     */
     fun setForceFlush(forceFlush: Boolean) {
         _uiInputDataStateFlow.update {
             it.copy(isForceFlush = forceFlush)
         }
     }
 
-    //
+    /**
+     * Called at the start of the composable view
+     */
     fun setContext(context: String) {  //Context) {
         _uiExecutionDataStateFlow.update {
             it.copy(context = context)
         }
     }
 
+    /**
+     * User pressed the 'show iperf3 output' button to toggle debug
+     */
     fun toggleDebug() {
         val newState = !_uiInputDataStateFlow.value.isDebugging
         _uiInputDataStateFlow.update {

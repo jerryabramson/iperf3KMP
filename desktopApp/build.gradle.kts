@@ -23,6 +23,16 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "edu.bu.cs683_jabramson_project.iperf3_network_tester"
             packageVersion = "1.0.0"
+
+            macOS {
+                iconFile.set(project.file("src/main/resources/app-icon.png"))
+            }
+            windows {
+                iconFile.set(project.file("src/main/resources/app-icon.png"))
+            }
+            linux {
+                iconFile.set(project.file("src/main/resources/app-icon.png"))
+            }
         }
     }
 }

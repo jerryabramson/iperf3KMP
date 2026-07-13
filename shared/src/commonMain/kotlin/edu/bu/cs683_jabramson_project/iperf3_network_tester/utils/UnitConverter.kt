@@ -37,25 +37,25 @@ object Units {
 
 fun toString(unitConvertedData: UnitConvertedData): String = "${unitConvertedData.value} ${unitConvertedData.unit}"
 
-fun toIntString(unitConvertedData: UnitConvertedData): String = if (unitConvertedData.value >  0) "$unitConvertedData.value.toInt())" else ZERO_STRING
+fun toIntString(unitConvertedData: UnitConvertedData): String = if (unitConvertedData.value >  0) "${unitConvertedData.value.toInt()})" else ZERO_STRING
 
 
 fun toWholeNumber(unitConvertedData: UnitConvertedData): String {
-    val ret = if (unitConvertedData.value >=  0)  "$unitConvertedData.value $unitConvertedData.unit" else ZERO_VALUE_STRING
+    val ret = if (unitConvertedData.value >=  0)  "${unitConvertedData.value} ${unitConvertedData.unit}" else ZERO_VALUE_STRING
     return ret
 }
 
 
 fun fromHumanUnit(value: Double, unit: String): Double {
-    val rawBitsPerSec = when (unit) {
-        KB_UNIT -> value * KBITS
-        MB_UNIT -> value * MBITS
-        GB_UNIT -> value * GBITS
-        TB_UNIT -> value * TBITS
-        else -> value
+        val rawBitsPerSec = when (unit) {
+            KB_UNIT -> value * KBITS
+            MB_UNIT -> value * MBITS
+            GB_UNIT -> value * GBITS
+            TB_UNIT -> value * TBITS
+            else -> value
+        }
+        return rawBitsPerSec
     }
-    return rawBitsPerSec
-}
 
 fun fromHumanString(value: String, unit: String): UnitConvertedData {
     val rawBitsPerSec = fromHumanUnit(value.toDouble(), unit)
@@ -83,14 +83,14 @@ fun toHumanUnit(rawBitsPerSec: Double): UnitConvertedData {
 }
 
 fun truncateDouble(d: Double): Double {
-    val str: String
-    if (d > Double.MIN_VALUE && d < Double.MAX_VALUE) {
-        str = d.toString() //"%10.2f".format(Locale.US, d)
-        return str.toDouble()
-    } else {
-        return 0.0
+        val str: String
+        if (d > Double.MIN_VALUE && d < Double.MAX_VALUE) {
+            str = d.toString() //"%10.2f".format(Locale.US, d)
+            return str.toDouble()
+        } else {
+            return 0.0
+        }
     }
-}
 
 fun tobps(current: Double): Long {
     if (current < Double.MAX_VALUE && current > Double.MIN_VALUE) {
