@@ -584,7 +584,7 @@ I need to check the shared/build.gradle.kts to verify the iOS target and other c
 21:     jvm()
 22: 
 23:     androidLibrary {
-24:         namespace = "edu.bu.cs683_jabramson_project.iperf3_network_tester.shared"
+24:         namespace = "iperf3_network_tester_kmp.shared"
 25:         compileSdk = libs.versions.android.compileSdk.get().toInt()
 26:         minSdk = libs.versions.android.minSdk.get().toInt()
 27: 
@@ -673,11 +673,11 @@ Let me also check the desktopApp build.gradle.kts and the source structure more 
 17: 
 18: compose.desktop {
 19:     application {
-20:         mainClass = "edu.bu.cs683_jabramson_project.iperf3_network_tester.MainKt"
+20:         mainClass = "iperf3_network_tester_kmp.MainKt"
 21: 
 22:         nativeDistributions {
 23:             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-24:             packageName = "edu.bu.cs683_jabramson_project.iperf3_network_tester"
+24:             packageName = "iperf3_network_tester_kmp"
 25:             packageVersion = "1.0.0"
 26:         }
 27:     }
@@ -928,7 +928,7 @@ Let me read the key source files and then try building to find the actual errors
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/App.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/App.kt"
 }
 ```
 
@@ -937,7 +937,7 @@ Let me read the key source files and then try building to find the actual errors
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/App.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester
+1: package iperf3_network_tester_kmp
 2: 
 3: import androidx.compose.animation.AnimatedVisibility
 4: import androidx.compose.foundation.Image
@@ -1005,7 +1005,7 @@ Let me read the other key files to understand the codebase and identify potentia
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/viewmodel/Iperf3RunViewModel.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/viewmodel/Iperf3RunViewModel.kt"
 }
 ```
 
@@ -1014,7 +1014,7 @@ Let me read the other key files to understand the codebase and identify potentia
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/viewmodel/Iperf3RunViewModel.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel
+1: package iperf3_network_tester_kmp.viewmodel
 2: 
 3: 
 4: 
@@ -1025,22 +1025,22 @@ Let me read the other key files to understand the codebase and identify potentia
 9: //import androidx.lifecycle.AndroidViewModel
 10: import androidx.lifecycle.viewModelScope
 11: //import androidx.room.Room
-12: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.database.ResultDataRepository
-13: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.database.ResultDatabase
+12: //import iperf3_network_tester_kmp.database.ResultDataRepository
+13: //import iperf3_network_tester_kmp.database.ResultDatabase
 14: //
-15: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultDataInProgress
-16: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.createResultData
-17: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.runner.IperfTestManage
-18: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getAverage
+15: //import iperf3_network_tester_kmp.model.ResultDataInProgress
+16: //import iperf3_network_tester_kmp.model.createResultData
+17: //import iperf3_network_tester_kmp.runner.IperfTestManage
+18: //import iperf3_network_tester_kmp.utils.getAverage
 19: //
-20: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMaximum
-21: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMedian
-22: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMinimum
-23: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getSampleSize
+20: //import iperf3_network_tester_kmp.utils.getMaximum
+21: //import iperf3_network_tester_kmp.utils.getMedian
+22: //import iperf3_network_tester_kmp.utils.getMinimum
+23: //import iperf3_network_tester_kmp.utils.getSampleSize
 24: //
-25: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getStandardDeviation
-26: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.printLineResult
-27: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.isDownload
+25: //import iperf3_network_tester_kmp.utils.getStandardDeviation
+26: //import iperf3_network_tester_kmp.utils.printLineResult
+27: import iperf3_network_tester_kmp.viewmodel.UploadDownload.isDownload
 28: 
 29: 
 30: import kotlinx.coroutines.Dispatchers
@@ -1863,7 +1863,7 @@ The root cause is clear: the codebase has Android-specific dependencies and refe
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/model/ResultData.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/model/ResultData.kt"
 }
 ```
 
@@ -1872,16 +1872,16 @@ The root cause is clear: the codebase has Android-specific dependencies and refe
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/model/ResultData.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.model
+1: package iperf3_network_tester_kmp.model
 2: 
 3: //import androidx.room.Entity
 4: //import androidx.room.PrimaryKey
-5: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.UnitConvertedData
+5: import iperf3_network_tester_kmp.utils.UnitConvertedData
 6: import java.util.UUID
 7: 
-8: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.UuidTypeConverter
+8: //import iperf3_network_tester_kmp.utils.UuidTypeConverter
 9: //import androidx.room.TypeConverters
-10: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.tobps
+10: import iperf3_network_tester_kmp.utils.tobps
 11: import java.time.LocalDateTime
 12: import java.time.OffsetDateTime
 13: 
@@ -2047,7 +2047,7 @@ Let me also read the other problematic files to understand the full scope.
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/Iperf3View.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/Iperf3View.kt"
 }
 ```
 
@@ -2056,7 +2056,7 @@ Let me also read the other problematic files to understand the full scope.
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/Iperf3View.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: 
 4: 
@@ -2082,9 +2082,9 @@ Let me also read the other problematic files to understand the full scope.
 24: import androidx.compose.ui.unit.sp
 25: import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 26: import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-27: import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.Iperf3NetworkTesterTheme
-28: import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.mesloFontFamily
-29: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.Iperf3RunViewModel
+27: import iperf3_network_tester_kmp.ui.theme.Iperf3NetworkTesterTheme
+28: import iperf3_network_tester_kmp.ui.theme.mesloFontFamily
+29: import iperf3_network_tester_kmp.viewmodel.Iperf3RunViewModel
 30: 
 31: 
 32: 
@@ -2275,9 +2275,9 @@ There's no `ui.theme` package. Let me check what files reference `mesloFontFamil
 ```
 Found 4 matches
 /Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/Iperf3View.kt:
-  Line 27: import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.Iperf3NetworkTesterTheme
+  Line 27: import iperf3_network_tester_kmp.ui.theme.Iperf3NetworkTesterTheme
 
-  Line 28: import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.mesloFontFamily
+  Line 28: import iperf3_network_tester_kmp.ui.theme.mesloFontFamily
 
   Line 93:     fontFamily = mesloFontFamily(),
 
@@ -2299,7 +2299,7 @@ These references are only in `Iperf3View.kt` and the theme files don't exist. Le
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/Iperf3OutputMonitor.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/utils/Iperf3OutputMonitor.kt"
 }
 ```
 
@@ -2308,12 +2308,12 @@ These references are only in `Iperf3View.kt` and the theme files don't exist. Le
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/Iperf3OutputMonitor.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.utils
+1: package iperf3_network_tester_kmp.utils
 2: 
 3: import android.annotation.SuppressLint
 4: 
-5: import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultDataInProgress
-6: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
+5: import iperf3_network_tester_kmp.model.ResultDataInProgress
+6: import iperf3_network_tester_kmp.viewmodel.UiInputData
 7: import java.util.Locale
 8: import kotlin.math.roundToLong
 9: import kotlin.math.sqrt
@@ -2689,7 +2689,7 @@ Now I see the full picture. Let me read a few more files to understand the scope
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/UuidTypeConverter.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/utils/UuidTypeConverter.kt"
 }
 ```
 
@@ -2698,7 +2698,7 @@ Now I see the full picture. Let me read a few more files to understand the scope
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/UuidTypeConverter.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.utils
+1: package iperf3_network_tester_kmp.utils
 2: 
 3: import androidx.room.TypeConverter
 4: import java.time.LocalDateTime
@@ -2813,7 +2813,7 @@ Now let me check the remaining files with Android imports in commonMain:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/GenericNumericField.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/GenericNumericField.kt"
 }
 ```
 
@@ -2822,7 +2822,7 @@ Now let me check the remaining files with Android imports in commonMain:
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/GenericNumericField.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import android.R.attr.defaultValue
 4: import android.R.attr.enabled
@@ -2907,7 +2907,7 @@ Let me check the remaining files with Android imports.
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/InputFields.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/InputFields.kt"
 }
 ```
 
@@ -2916,7 +2916,7 @@ Let me check the remaining files with Android imports.
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/InputFields.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: 
 4: import android.R.attr.label
@@ -2945,9 +2945,9 @@ Let me check the remaining files with Android imports.
 27: 
 28: 
 29: 
-30: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
-31: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
-32: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.DefaultInputData
+30: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
+31: import iperf3_network_tester_kmp.viewmodel.UiInputData
+32: import iperf3_network_tester_kmp.viewmodel.DefaultInputData
 33: 
 34: 
 35: /**
@@ -3095,7 +3095,7 @@ Let me now check the remaining files:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ProjectBottomBar.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/ProjectBottomBar.kt"
 }
 ```
 
@@ -3104,7 +3104,7 @@ Let me now check the remaining files:
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ProjectBottomBar.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import android.R
 4: import android.util.Log.e
@@ -3121,7 +3121,7 @@ Let me now check the remaining files:
 15: import androidx.compose.ui.tooling.preview.Preview
 16: import androidx.compose.ui.unit.dp
 17: import androidx.compose.ui.unit.sp
-18: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
+18: import iperf3_network_tester_kmp.viewmodel.UiInputData
 19: import java.nio.file.Files.size
 20: 
 21: 
@@ -3174,7 +3174,7 @@ _Thinking:_
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/RunningColumnSection.kt"
 }
 ```
 
@@ -3183,7 +3183,7 @@ _Thinking:_
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import android.annotation.SuppressLint
 4: import androidx.compose.foundation.layout.Arrangement
@@ -3206,9 +3206,9 @@ _Thinking:_
 21: import androidx.compose.ui.tooling.preview.Preview
 22: import androidx.compose.ui.unit.dp
 23: import androidx.compose.ui.unit.sp
-24: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.toWholeNumber
-25: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
-26: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
+24: import iperf3_network_tester_kmp.utils.toWholeNumber
+25: import iperf3_network_tester_kmp.viewmodel.UiInputData
+26: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
 27: 
 28: 
 29: @OptIn(ExperimentalMaterial3Api::class)
@@ -3397,7 +3397,7 @@ This file references `uiState.resultDataInProgress` (lines 94, 112, 113, 116, 13
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/UploadDownload.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/UploadDownload.kt"
 }
 ```
 
@@ -3406,7 +3406,7 @@ This file references `uiState.resultDataInProgress` (lines 94, 112, 113, 116, 13
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/UploadDownload.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: 
 4: import android.R.attr.onClick
@@ -3430,14 +3430,14 @@ This file references `uiState.resultDataInProgress` (lines 94, 112, 113, 116, 13
 22: import androidx.compose.ui.tooling.preview.Preview
 23: import androidx.compose.ui.unit.dp
 24: import androidx.lifecycle.viewmodel.compose.viewModel
-25: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
-26: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
+25: import iperf3_network_tester_kmp.viewmodel.UiInputData
+26: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
 27: import java.util.Locale.getDefault
 28: import androidx.compose.ui.platform.LocalLocale
-29: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.DOWNLOAD
-30: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.UPLOAD
-31: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.isDownload
-32: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.isUploadOrDownload
+29: import iperf3_network_tester_kmp.viewmodel.UploadDownload.DOWNLOAD
+30: import iperf3_network_tester_kmp.viewmodel.UploadDownload.UPLOAD
+31: import iperf3_network_tester_kmp.viewmodel.UploadDownload.isDownload
+32: import iperf3_network_tester_kmp.viewmodel.UploadDownload.isUploadOrDownload
 33: 
 34: 
 35: /**
@@ -3515,7 +3515,7 @@ Again, `android.R.attr.onClick` is imported but never used. Let me check the rem
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/DebugOutputSection.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/DebugOutputSection.kt"
 }
 ```
 
@@ -3524,7 +3524,7 @@ Again, `android.R.attr.onClick` is imported but never used. Let me check the rem
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/DebugOutputSection.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import androidx.compose.foundation.border
 4: import androidx.compose.foundation.layout.Box
@@ -3546,9 +3546,9 @@ Again, `android.R.attr.onClick` is imported but never used. Let me check the rem
 20: import androidx.compose.ui.tooling.preview.Preview
 21: import androidx.compose.ui.unit.dp
 22: import androidx.compose.ui.unit.sp
-23: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getHeading
-24: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
-25: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
+23: //import iperf3_network_tester_kmp.utils.getHeading
+24: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
+25: import iperf3_network_tester_kmp.viewmodel.UiInputData
 26: 
 27: @Preview(name = "Debug Output Section", showBackground = true,
 28:     device = "spec:width=411dp,height=891dp")
@@ -3656,7 +3656,7 @@ Let me check the remaining files.
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ResultsRow.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/ResultsRow.kt"
 }
 ```
 
@@ -3665,7 +3665,7 @@ Let me check the remaining files.
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ResultsRow.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import androidx.compose.foundation.layout.Column
 4: import androidx.compose.foundation.layout.Spacer
@@ -3684,8 +3684,8 @@ Let me check the remaining files.
 17: import androidx.compose.ui.tooling.preview.Preview
 18: import androidx.compose.ui.unit.dp
 19: import androidx.compose.ui.unit.sp
-20: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getDest
-21: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getSource
+20: import iperf3_network_tester_kmp.utils.getDest
+21: import iperf3_network_tester_kmp.utils.getSource
 22: 
 23: 
 24: /**
@@ -3698,7 +3698,7 @@ Let me check the remaining files.
 31: )
 32: @Composable
 33: fun ResultsRow(
-34:     uiState: edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData = getSampleUiState(),
+34:     uiState: iperf3_network_tester_kmp.viewmodel.UiExecutionData = getSampleUiState(),
 35:     monoStyle: TextStyle = mesloMonoTextStyle()
 36: ) {
 37:     Column(
@@ -3775,7 +3775,7 @@ Let me check `SampleUIData.kt`, `Iperf3Test.kt`, and `IperfTopBar.kt`.
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/SampleUIData.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/SampleUIData.kt"
 }
 ```
 
@@ -3784,14 +3784,14 @@ Let me check `SampleUIData.kt`, `Iperf3Test.kt`, and `IperfTopBar.kt`.
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/SampleUIData.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
-3: import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultData
-4: import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultDataInProgress
-5: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.UnitConvertedData
-6: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.DefaultInputData
-7: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
-8: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
+3: import iperf3_network_tester_kmp.model.ResultData
+4: import iperf3_network_tester_kmp.model.ResultDataInProgress
+5: import iperf3_network_tester_kmp.utils.UnitConvertedData
+6: import iperf3_network_tester_kmp.viewmodel.DefaultInputData
+7: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
+8: import iperf3_network_tester_kmp.viewmodel.UiInputData
 9: 
 10: class SampleUIData {
 11:     val sampleOutputData = listOf(
@@ -3900,7 +3900,7 @@ Let me check the remaining files: `Iperf3Test.kt` and `IperfTopBar.kt`.
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/Iperf3Test.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/Iperf3Test.kt"
 }
 ```
 
@@ -3910,7 +3910,7 @@ Let me check the remaining files: `Iperf3Test.kt` and `IperfTopBar.kt`.
 <type>file</type>
 <content>
 1: 
-2: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+2: package iperf3_network_tester_kmp.view
 3: 
 4: 
 5: 
@@ -3944,7 +3944,7 @@ Let me check the remaining files: `Iperf3Test.kt` and `IperfTopBar.kt`.
 33: import androidx.compose.ui.unit.Dp
 34: import androidx.compose.ui.unit.dp
 35: 
-36: import edu.bu.cs683_jabramson_project.iperf3_network_tester.R
+36: import iperf3_network_tester_kmp.R
 37: 
 38: 
 39: 
@@ -4056,7 +4056,7 @@ Let me check the remaining files: `Iperf3Test.kt` and `IperfTopBar.kt`.
 
 _Thinking:_
 
-`Iperf3Test.kt` references `edu.bu.cs683_jabramson_project.iperf3_network_tester.R` at line 36 and `R.drawable.baseline_directions_bus_24` at line 102. The `R` class is generated from Android resources and doesn't exist in the commonMain source set for JVM/iOS targets. Let me check `IperfTopBar.kt`.
+`Iperf3Test.kt` references `iperf3_network_tester_kmp.R` at line 36 and `R.drawable.baseline_directions_bus_24` at line 102. The `R` class is generated from Android resources and doesn't exist in the commonMain source set for JVM/iOS targets. Let me check `IperfTopBar.kt`.
 
 
 **Tool: read**
@@ -4064,7 +4064,7 @@ _Thinking:_
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/IperfTopBar.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/IperfTopBar.kt"
 }
 ```
 
@@ -4073,7 +4073,7 @@ _Thinking:_
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/IperfTopBar.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import androidx.compose.foundation.background
 4: import androidx.compose.foundation.layout.Row
@@ -4089,8 +4089,8 @@ _Thinking:_
 14: import androidx.compose.ui.res.stringResource
 15: import androidx.compose.ui.tooling.preview.Preview
 16: import androidx.compose.ui.unit.dp
-17: import edu.bu.cs683_jabramson_project.iperf3_network_tester.R
-18: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
+17: import iperf3_network_tester_kmp.R
+18: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
 19: 
 20: /**
 21:  * Top bar for the UI.
@@ -4161,7 +4161,7 @@ Now I have a complete picture. Let me also verify the test files are okay:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonTest/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/SharedCommonTest.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonTest/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/SharedCommonTest.kt"
 }
 ```
 
@@ -4170,7 +4170,7 @@ Now I have a complete picture. Let me also verify the test files are okay:
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonTest/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/SharedCommonTest.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester
+1: package iperf3_network_tester_kmp
 2: 
 3: import kotlin.test.Test
 4: import kotlin.test.assertEquals
@@ -4508,7 +4508,7 @@ Good progress — down from ~80 errors to just **11**. Let me check the remainin
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/GenericNumericField.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/GenericNumericField.kt"
 }
 ```
 
@@ -4517,7 +4517,7 @@ Good progress — down from ~80 errors to just **11**. Let me check the remainin
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/GenericNumericField.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import android.R.attr.defaultValue
 4: import android.R.attr.enabled
@@ -4602,7 +4602,7 @@ Let me check the other remaining files.
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/InputFields.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/InputFields.kt"
 }
 ```
 
@@ -4611,7 +4611,7 @@ Let me check the other remaining files.
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/InputFields.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: 
 4: import android.R.attr.label
@@ -4640,9 +4640,9 @@ Let me check the other remaining files.
 27: 
 28: 
 29: 
-30: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
-31: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
-32: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.DefaultInputData
+30: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
+31: import iperf3_network_tester_kmp.viewmodel.UiInputData
+32: import iperf3_network_tester_kmp.viewmodel.DefaultInputData
 33: 
 34: 
 35: /**
@@ -4788,7 +4788,7 @@ Same issue — lines 4-5 have unused `android.R.attr.*` imports. Let me check th
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ProjectBottomBar.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/ProjectBottomBar.kt"
 }
 ```
 
@@ -4797,7 +4797,7 @@ Same issue — lines 4-5 have unused `android.R.attr.*` imports. Let me check th
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ProjectBottomBar.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import android.R
 4: import android.util.Log.e
@@ -4814,7 +4814,7 @@ Same issue — lines 4-5 have unused `android.R.attr.*` imports. Let me check th
 15: import androidx.compose.ui.tooling.preview.Preview
 16: import androidx.compose.ui.unit.dp
 17: import androidx.compose.ui.unit.sp
-18: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
+18: import iperf3_network_tester_kmp.viewmodel.UiInputData
 19: import java.nio.file.Files.size
 20: 
 21: 
@@ -4867,7 +4867,7 @@ Lines 3-4: `import android.R` and `import android.util.Log.e` — neither is use
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/RunningColumnSection.kt"
 }
 ```
 
@@ -4876,7 +4876,7 @@ Lines 3-4: `import android.R` and `import android.util.Log.e` — neither is use
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import android.annotation.SuppressLint
 4: import androidx.compose.foundation.layout.Arrangement
@@ -4899,9 +4899,9 @@ Lines 3-4: `import android.R` and `import android.util.Log.e` — neither is use
 21: import androidx.compose.ui.tooling.preview.Preview
 22: import androidx.compose.ui.unit.dp
 23: import androidx.compose.ui.unit.sp
-24: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.toWholeNumber
-25: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
-26: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
+24: import iperf3_network_tester_kmp.utils.toWholeNumber
+25: import iperf3_network_tester_kmp.viewmodel.UiInputData
+26: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
 27: 
 28: 
 29: @OptIn(ExperimentalMaterial3Api::class)
@@ -5094,7 +5094,7 @@ Let me check the remaining files.
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/UploadDownload.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/UploadDownload.kt"
 }
 ```
 
@@ -5103,7 +5103,7 @@ Let me check the remaining files.
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/UploadDownload.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: 
 4: import android.R.attr.onClick
@@ -5127,14 +5127,14 @@ Let me check the remaining files.
 22: import androidx.compose.ui.tooling.preview.Preview
 23: import androidx.compose.ui.unit.dp
 24: import androidx.lifecycle.viewmodel.compose.viewModel
-25: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
-26: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
+25: import iperf3_network_tester_kmp.viewmodel.UiInputData
+26: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
 27: import java.util.Locale.getDefault
 28: import androidx.compose.ui.platform.LocalLocale
-29: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.DOWNLOAD
-30: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.UPLOAD
-31: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.isDownload
-32: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.isUploadOrDownload
+29: import iperf3_network_tester_kmp.viewmodel.UploadDownload.DOWNLOAD
+30: import iperf3_network_tester_kmp.viewmodel.UploadDownload.UPLOAD
+31: import iperf3_network_tester_kmp.viewmodel.UploadDownload.isDownload
+32: import iperf3_network_tester_kmp.viewmodel.UploadDownload.isUploadOrDownload
 33: 
 34: 
 35: /**
@@ -5214,7 +5214,7 @@ Let me check the ViewModel file.
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/viewmodel/Iperf3RunViewModel.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/viewmodel/Iperf3RunViewModel.kt",
   "limit": 30
 }
 ```
@@ -5224,7 +5224,7 @@ Let me check the ViewModel file.
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/viewmodel/Iperf3RunViewModel.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel
+1: package iperf3_network_tester_kmp.viewmodel
 2: 
 3: 
 4: 
@@ -5235,22 +5235,22 @@ Let me check the ViewModel file.
 9: //import androidx.lifecycle.AndroidViewModel
 10: import androidx.lifecycle.viewModelScope
 11: //import androidx.room.Room
-12: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.database.ResultDataRepository
-13: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.database.ResultDatabase
+12: //import iperf3_network_tester_kmp.database.ResultDataRepository
+13: //import iperf3_network_tester_kmp.database.ResultDatabase
 14: //
-15: import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultDataInProgress
-16: import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.createResultData
-17: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.runner.IperfTestManage
-18: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getAverage
+15: import iperf3_network_tester_kmp.model.ResultDataInProgress
+16: import iperf3_network_tester_kmp.model.createResultData
+17: //import iperf3_network_tester_kmp.runner.IperfTestManage
+18: //import iperf3_network_tester_kmp.utils.getAverage
 19: //
-20: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMaximum
-21: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMedian
-22: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getMinimum
-23: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getSampleSize
+20: //import iperf3_network_tester_kmp.utils.getMaximum
+21: //import iperf3_network_tester_kmp.utils.getMedian
+22: //import iperf3_network_tester_kmp.utils.getMinimum
+23: //import iperf3_network_tester_kmp.utils.getSampleSize
 24: //
-25: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getStandardDeviation
-26: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.printLineResult
-27: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UploadDownload.isDownload
+25: //import iperf3_network_tester_kmp.utils.getStandardDeviation
+26: //import iperf3_network_tester_kmp.utils.printLineResult
+27: import iperf3_network_tester_kmp.viewmodel.UploadDownload.isDownload
 28: 
 29: 
 30: import kotlinx.coroutines.Dispatchers
@@ -5275,7 +5275,7 @@ Now let me check `Iperf3OutputMonitor.kt` since it was one of the original offen
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/Iperf3OutputMonitor.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/utils/Iperf3OutputMonitor.kt",
   "limit": 60
 }
 ```
@@ -5285,13 +5285,13 @@ Now let me check `Iperf3OutputMonitor.kt` since it was one of the original offen
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/Iperf3OutputMonitor.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.utils
+1: package iperf3_network_tester_kmp.utils
 2: 
 3: //import android.annotation.SuppressLint
 4: import androidx.compose.ui.text.intl.Locale
 5: 
-6: import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultDataInProgress
-7: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
+6: import iperf3_network_tester_kmp.model.ResultDataInProgress
+7: import iperf3_network_tester_kmp.viewmodel.UiInputData
 8: //import java.util.Locale
 9: import kotlin.math.roundToLong
 10: import kotlin.math.sqrt
@@ -5366,7 +5366,7 @@ Now let me check `UuidTypeConverter.kt`:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/UuidTypeConverter.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/utils/UuidTypeConverter.kt"
 }
 ```
 
@@ -5391,7 +5391,7 @@ Now let me check `ResultData.kt` to see if the `guid` issue was fixed:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/model/ResultData.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/model/ResultData.kt",
   "offset": 115
 }
 ```
@@ -5461,7 +5461,7 @@ The `guid` issue on line 124 is still there — `ResultData` no longer has a `gu
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/model/ResultData.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/model/ResultData.kt",
   "offset": 15,
   "limit": 40
 }
@@ -5535,7 +5535,7 @@ Let me also check `SampleUIData.kt` and `DebugOutputSection.kt`:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/SampleUIData.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/SampleUIData.kt"
 }
 ```
 
@@ -5544,14 +5544,14 @@ Let me also check `SampleUIData.kt` and `DebugOutputSection.kt`:
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/SampleUIData.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
-3: import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultData
-4: import edu.bu.cs683_jabramson_project.iperf3_network_tester.model.ResultDataInProgress
-5: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.UnitConvertedData
-6: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.DefaultInputData
-7: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
-8: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
+3: import iperf3_network_tester_kmp.model.ResultData
+4: import iperf3_network_tester_kmp.model.ResultDataInProgress
+5: import iperf3_network_tester_kmp.utils.UnitConvertedData
+6: import iperf3_network_tester_kmp.viewmodel.DefaultInputData
+7: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
+8: import iperf3_network_tester_kmp.viewmodel.UiInputData
 9: 
 10: class SampleUIData {
 11:     val sampleOutputData = listOf(
@@ -5658,7 +5658,7 @@ Line 74: `resultDataInProgress = sampleResultData` — this requires `UiExecutio
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/viewmodel/Iperf3RunViewModel.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/viewmodel/Iperf3RunViewModel.kt",
   "offset": 85,
   "limit": 35
 }
@@ -5723,7 +5723,7 @@ Good — `resultDataInProgress` is back in `UiExecutionData` on lines 105-111. N
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/DebugOutputSection.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/DebugOutputSection.kt",
   "offset": 20,
   "limit": 15
 }
@@ -5737,10 +5737,10 @@ Good — `resultDataInProgress` is back in `UiExecutionData` on lines 105-111. N
 20: import androidx.compose.ui.tooling.preview.Preview
 21: import androidx.compose.ui.unit.dp
 22: import androidx.compose.ui.unit.sp
-23: import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getHeading
-24: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getHeading
-25: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
-26: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiInputData
+23: import iperf3_network_tester_kmp.utils.getHeading
+24: //import iperf3_network_tester_kmp.utils.getHeading
+25: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
+26: import iperf3_network_tester_kmp.viewmodel.UiInputData
 27: 
 28: 
 29: @Preview(name = "Debug Output Section", showBackground = true,
@@ -5770,7 +5770,7 @@ Now let me check `Iperf3View.kt` and `Iperf3Test.kt` and `IperfTopBar.kt` since 
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/Iperf3View.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/Iperf3View.kt"
 }
 ```
 
@@ -5779,7 +5779,7 @@ Now let me check `Iperf3View.kt` and `Iperf3Test.kt` and `IperfTopBar.kt` since 
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/Iperf3View.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: 
 4: 
@@ -5807,10 +5807,10 @@ Now let me check `Iperf3View.kt` and `Iperf3Test.kt` and `IperfTopBar.kt` since 
 26: //import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 27: //import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 28: //import androidx.lifecycle.viewmodel.compose.viewModel
-29: import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.Iperf3NetworkTesterTheme
-30: import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.mesloFontFamily
-31: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.mesloFontFamily
-32: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.Iperf3RunViewModel
+29: import iperf3_network_tester_kmp.ui.theme.Iperf3NetworkTesterTheme
+30: import iperf3_network_tester_kmp.ui.theme.mesloFontFamily
+31: //import iperf3_network_tester_kmp.ui.theme.mesloFontFamily
+32: import iperf3_network_tester_kmp.viewmodel.Iperf3RunViewModel
 33: 
 34: 
 35: 
@@ -5957,7 +5957,7 @@ Now let me check `Iperf3View.kt` and `Iperf3Test.kt` and `IperfTopBar.kt` since 
 
 _Thinking:_
 
-Lines 29-30: `import edu.bu.cs683_jabramson_project.iperf3_network_tester.ui.theme.Iperf3NetworkTesterTheme` and `mesloFontFamily` — these are still there and the `ui.theme` package doesn't exist. Line 32: `import ...viewmodel.Iperf3RunViewModel` — the ViewModel class is commented out (lines 122+) so this import is unresolved.
+Lines 29-30: `import iperf3_network_tester_kmp.ui.theme.Iperf3NetworkTesterTheme` and `mesloFontFamily` — these are still there and the `ui.theme` package doesn't exist. Line 32: `import ...viewmodel.Iperf3RunViewModel` — the ViewModel class is commented out (lines 122+) so this import is unresolved.
 
 Lines 48-49: `viewModel.uiExecutionDataStateFlow` and `viewModel.uiInputDataStateFlow` — these are properties of the commented-out ViewModel class.
 
@@ -5979,7 +5979,7 @@ Let me check `Iperf3Test.kt`:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/Iperf3Test.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/Iperf3Test.kt"
 }
 ```
 
@@ -5989,7 +5989,7 @@ Let me check `Iperf3Test.kt`:
 <type>file</type>
 <content>
 1: 
-2: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+2: package iperf3_network_tester_kmp.view
 3: 
 4: 
 5: 
@@ -6136,7 +6136,7 @@ Let me check `Iperf3Test.kt`:
 
 _Thinking:_
 
-Good — the `R.drawable` reference was commented out on lines 102-116. But line 32 has a new import: `import androidx.compose.ui.input.key.Key.Companion.R` — this is to resolve the `R` reference that was previously from `edu.bu.cs683_jabramson_project.iperf3_network_tester.R`. But looking at the code, `R` isn't used anywhere now (the Icon was commented out). This import is unused but won't cause a compilation error.
+Good — the `R.drawable` reference was commented out on lines 102-116. But line 32 has a new import: `import androidx.compose.ui.input.key.Key.Companion.R` — this is to resolve the `R` reference that was previously from `iperf3_network_tester_kmp.R`. But looking at the code, `R` isn't used anywhere now (the Icon was commented out). This import is unused but won't cause a compilation error.
 
 Line 16: `import androidx.compose.ui.res.painterResource` — this is unused now since the Icon was commented out.
 
@@ -6148,7 +6148,7 @@ Let me check `IperfTopBar.kt`:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/IperfTopBar.kt"
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/IperfTopBar.kt"
 }
 ```
 
@@ -6157,7 +6157,7 @@ Let me check `IperfTopBar.kt`:
 <path>/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/IperfTopBar.kt</path>
 <type>file</type>
 <content>
-1: package edu.bu.cs683_jabramson_project.iperf3_network_tester.view
+1: package iperf3_network_tester_kmp.view
 2: 
 3: import androidx.compose.foundation.background
 4: import androidx.compose.foundation.layout.Row
@@ -6174,8 +6174,8 @@ Let me check `IperfTopBar.kt`:
 15: //import androidx.compose.ui.res.stringResource
 16: import androidx.compose.ui.tooling.preview.Preview
 17: import androidx.compose.ui.unit.dp
-18: //import edu.bu.cs683_jabramson_project.iperf3_network_tester.R
-19: import edu.bu.cs683_jabramson_project.iperf3_network_tester.viewmodel.UiExecutionData
+18: //import iperf3_network_tester_kmp.R
+19: import iperf3_network_tester_kmp.viewmodel.UiExecutionData
 20: import iperf3kmp.shared.generated.resources.Res
 21: import iperf3kmp.shared.generated.resources.app_name
 22: import org.jetbrains.compose.resources.stringResource
@@ -6350,7 +6350,7 @@ The build fails at `Iperf3RunViewModel.kt:5` before it gets to the other errors 
 **Input:**
 ```json
 {
-  "command": "grep -n \"startDateTime\" /Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/model/ResultData.kt"
+  "command": "grep -n \"startDateTime\" /Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/model/ResultData.kt"
 }
 ```
 
@@ -6376,7 +6376,7 @@ Wait — line 70 shows `startDateTime: LocalDateTime` but earlier I saw it as `O
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/model/ResultData.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/model/ResultData.kt",
   "limit": 10,
   "offset": 65
 }
@@ -6418,7 +6418,7 @@ Now let me check the `ResultsRow.kt` and `DebugOutputSection.kt` references to `
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ResultsRow.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/ResultsRow.kt",
   "limit": 10,
   "offset": 50
 }
@@ -6460,7 +6460,7 @@ Now let me check `DebugOutputSection.kt`:
 **Input:**
 ```json
 {
-  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/DebugOutputSection.kt",
+  "filePath": "/Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester_kmp/view/DebugOutputSection.kt",
   "limit": 5,
   "offset": 37
 }
@@ -6516,7 +6516,7 @@ Here's the current status review:
 | `Iperf3Test.kt:16` | `import androidx.compose.ui.res.painterResource` | Unused (Icon was commented out lines 102-116) |
 | `Iperf3Test.kt:32` | `import androidx.compose.ui.input.key.Key.Companion.R` | Unused (replaced old `R.drawable` reference) |
 | `IperfTopBar.kt:14,20-22` | Unused imports | `Key.Companion.R`, `Res`, `app_name`, `stringResource` — all commented-out or replaced with hardcoded string on line 53 |
-| `DebugOutputSection.kt:24` | Duplicate commented import | `//import edu.bu.cs683_jabramson_project.iperf3_network_tester.utils.getHeading` |
+| `DebugOutputSection.kt:24` | Duplicate commented import | `//import iperf3_network_tester_kmp.utils.getHeading` |
 | `Iperf3RunViewModel.kt:15-16` | `import ...model.ResultDataInProgress` / `createResultData` | Used only by commented-out code. `ResultDataInProgress` and `createResultData` are live (used by views) but the ViewModel's own references to them are in commented code. |
 
 ### What's working well:

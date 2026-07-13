@@ -17,11 +17,11 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "edu.bu.cs683_jabramson_project.iperf3_network_tester.MainKt"
+        mainClass = "edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "edu.bu.cs683_jabramson_project.iperf3_network_tester"
+            packageName = "edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp"
             packageVersion = "1.0.0"
 
             macOS {

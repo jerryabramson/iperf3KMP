@@ -21,11 +21,11 @@ dependencies {
 }
 
 android {
-    namespace = "edu.bu.cs683_jabramson_project.iperf3_network_tester"
+    namespace = "edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "edu.bu.cs683_jabramson_project.iperf3_network_tester"
+        applicationId = "edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp"
         minSdk = 26 //libs.versions.android.minSdk.get().toInt()
         targetSdk = 36 //libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

@@ -22,7 +22,7 @@
 
 ## Gotchas
 
-- Desktop main class: `edu.bu.cs683_jabramson_project.iperf3_network_tester.MainKt` (`desktopApp/build.gradle.kts:20`)
+- Desktop main class: `iperf3_network_tester_kmp.MainKt` (`desktopApp/build.gradle.kts:20`)
 - Shared module targets **both** `iosArm64()` and `iosSimulatorArm64()` (`shared/build.gradle.kts:12-13`)
 - Compose Multiplatform **1.11.1** (check `gradle/libs.versions.toml` for exact versions)
 - foojay-resolver plugin auto-provisions JDK (no manual install needed)
