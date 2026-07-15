@@ -1,3 +1,6 @@
+## Resume this session with:o cancel
+* claude --resume 7fa81bd4-b0ac-442f-8ce5-0aeacf532ae7
+
 # Configuring MCP (Model Context Protocol) Tool Access for Local LLM Agents in LM Studio: A Cross-Platform Debugging Case Study
 
 **Author:** Jerry Abramson
