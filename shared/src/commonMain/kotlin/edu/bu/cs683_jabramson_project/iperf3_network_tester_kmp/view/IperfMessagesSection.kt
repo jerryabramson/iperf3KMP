@@ -29,7 +29,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExec
 )
 @Composable
 fun IperfMessagesSection(
-    isDebugMode: Boolean,
+    isDebugMode: Boolean = true,
     uiState: UiExecutionData = getSampleUiState(),
     monoStyle: TextStyle = mesloMonoTextStyle()
 ) {
