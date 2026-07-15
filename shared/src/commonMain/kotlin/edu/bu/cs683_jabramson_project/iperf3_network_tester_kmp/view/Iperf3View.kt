@@ -19,6 +19,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 //import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_TYPE_NORMAL
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,10 +37,6 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(name = "Iperf3Screen",
-    showBackground = true,
-    device =  Devices.PIXEL_9_PRO,
-    showSystemUi = true)
 @Composable
 //fun RunIperf3Screen(viewModel: Iperf3RunViewModel)
 fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= hiltViewModel(
@@ -106,17 +104,18 @@ fun mesloMonoTextStyle(): TextStyle = TextStyle(
     color = MaterialTheme.colorScheme.onSurface
 )
 
-
+@Retention(AnnotationRetention.BINARY)
+@Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
+@Preview(name = "Light", showBackground = true, device =  Devices.PIXEL_9_PRO, showSystemUi = true)
+@Preview(name = "Dark", showBackground = true, uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL, device =  Devices.PIXEL_9_PRO, showSystemUi = true)
+annotation class PreviewLightDarkWithBackground
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(name = "Iperf3Screen",
-    showBackground = true,
-    device =  Devices.PIXEL_9_PRO,
-    showSystemUi = true)
+@PreviewLightDarkWithBackground
 @Composable
 fun PreviewIperf3Screen() {
     val monoStyle = mesloMonoTextStyle()
     val fieldColors = textFieldColors()
-    Iperf3NetworkTesterTheme(darkTheme = false, dynamicColor = true) {
+    Iperf3NetworkTesterTheme(dynamicColor = true) {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
