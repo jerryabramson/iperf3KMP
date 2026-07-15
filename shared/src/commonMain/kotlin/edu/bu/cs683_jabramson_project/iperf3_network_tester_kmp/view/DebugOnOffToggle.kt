@@ -9,19 +9,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 
-@Preview(name ="DebugOnOffRadioButtonPreview", showBackground = true, device = "id:pixel_9")
+@Preview(name ="DebugOnOffRadioButtonPreview", showBackground = true, device = Devices.PIXEL_9, showSystemUi = true)
 @Composable
 fun DebugOnOffToggle(
-    uiState: UiInputData = getSampleInputData(),
+    currentDebugging: Boolean = getSampleInputData().isDebugging,
     toggleDebug: () -> Unit = {}
 ) {
-    val buttonColor = if (!uiState.isDebugging) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+    val buttonColor = if (!currentDebugging) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
     Column(horizontalAlignment = Alignment.End) {
         Text(text = "iperf3 Output",
             modifier = Modifier.padding(end = 10.dp),
@@ -34,7 +35,7 @@ fun DebugOnOffToggle(
             shape = MaterialTheme.shapes.small,
             modifier = Modifier.padding(1.dp)//.width(240.dp).height(50.dp)
         ) {
-            if (uiState.isDebugging) {
+            if (currentDebugging) {
                 Text(text = "Turn Off",
                     color = MaterialTheme.colorScheme.surface,
                     style = MaterialTheme.typography.labelSmall)

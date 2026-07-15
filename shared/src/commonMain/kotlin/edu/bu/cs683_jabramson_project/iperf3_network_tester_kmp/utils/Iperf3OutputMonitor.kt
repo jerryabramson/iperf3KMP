@@ -3,6 +3,7 @@ package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils
 //import android.annotation.SuppressLint
 //import androidx.compose.ui.text.intl.Locale
 
+import androidx.compose.foundation.layout.IntrinsicSize
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.ResultDataInProgress
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 //import java.util.Locale
@@ -270,42 +271,17 @@ class Iperf3OutputMonitor {
 }
 
 fun getDebugHeading(): String {
-    val heading = //"%-12.12s %4.4s %-9.9s %7.7s %7.7s %7.7s %10.10s".format(
-        """Interval,
-        "rate",
-        "Unit",
-        "Avg",
-        "Min",
-        "Max",
-        "comment"
-        """
-    return heading
+    return "Interval,   rate,       Unit,   Avg, Min,  Max,  comment"
+
 }
 
 fun getDebugHeadingUL(): String {
     val ul = //"%-12.12s %4.4s %-9.9s %7.7s %7.7s %7.7s %10.10s".format(
-        """
-        ------------
-        ----
-        ---------
-        -------
-        -------
-        -------
-        ----------
-        """
-    return ul
+        return " ------------, ----,  ---------,  -------,  -------,   -------"
 }
 
 fun getHeading(): String {
-    val heading = //"%-12.12s %4.4s %-9.9s %10.10s".format(
-        """
-        Interval
-        rate
-        Unit
-        comment
-"""
-
-    return heading
+    return "Interval,  rate,        Unit,         comment"
 }
 
 

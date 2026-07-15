@@ -18,19 +18,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 
 @Preview(name = "Error Section Preview", showBackground = true,
     device = "spec:width=411dp,height=891dp"
 )
 @Composable
 fun ErrorSection(
-    uiState: edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData = getSampleUiState(),
+    uiState: UiExecutionData = getSampleUiState(),
     monoStyle: TextStyle = mesloMonoTextStyle()
 ) {
     if (uiState.errorLines.isEmpty()) return
     Column(
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier.padding(start = 2.dp, end =  2.dp).fillMaxWidth()
+        modifier = Modifier.padding(start = 2.dp, end =  2.dp).fillMaxWidth(),
     ) {
         Spacer(modifier = Modifier.height(2.dp))
         HorizontalDivider(
@@ -51,9 +52,9 @@ private fun ErrorLineItem(text: String, style: TextStyle) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = text,
-            color = MaterialTheme.colorScheme.error,
+            color = MaterialTheme.colorScheme.onErrorContainer,
             textAlign = TextAlign.Left,
-            style = style.copy(fontSize = 12.sp),
+            style = style.copy(fontSize = 16.sp),
             modifier = Modifier.fillMaxWidth()
         )
     }

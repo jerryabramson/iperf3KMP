@@ -20,11 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.DefaultInputData
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3RunViewModel
 
 
 /**
@@ -39,12 +41,16 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Defaul
  * @param style the style for the monospaced text
  */
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(name = "Host Input Row", showBackground = true, device = "spec:width=411dp,height=891dp", showSystemUi = true)
+//@Preview(name = "Host Input Row", showBackground = true, device = "spec:width=411dp,height=891dp", showSystemUi = true)
 @Composable
 fun InputFields(
-    uiState: UiExecutionData = getSampleUiState(),
-    inputState: UiInputData = getSampleInputData(),
-    isRunning: Boolean = false,
+    currentHostName: String = getSampleInputData().hostName,
+    currentPort: Int = getSampleInputData().portNumber,
+    currentDuration: Int = getSampleInputData().durationSecs,
+    currentParallelStreams: Int = getSampleInputData().parallelStreams,
+    currentSkip: Int = getSampleInputData().skip,
+    currentReverse: Boolean = getSampleInputData().isReverse,
+    isRunning: Boolean = getSampleUiState().isRunning,
     updateHostName: (String) -> Unit = {},
     uploadDownload: (String) -> Unit = {},
     launch: () -> Unit = {},
@@ -60,15 +66,25 @@ fun InputFields(
     val valString = if (currentValue == -1) "" else currentValue.toString()
  */
 
+//    val valString: String
+//    val placeHolder: String
+//    if (inputState.hostName.trim().isEmpty() || inputState.hostName.trim() == DefaultInputData.HOST_NAME.trim()) {
+//        valString = DefaultInputData.HOST_NAME.trim()
+//        placeHolder = "iperf3 Server"
+//    } else {
+//        valString = inputState.hostName.trim()
+//        placeHolder = ""
+//    }
     val valString: String
     val placeHolder: String
-    if (inputState.hostName.trim().isEmpty() || inputState.hostName.trim() == DefaultInputData.HOST_NAME.trim()) {
+    if (currentHostName.trim().isEmpty() || currentHostName.trim() == DefaultInputData.HOST_NAME.trim()) {
         valString = ""
         placeHolder = DefaultInputData.HOST_NAME.trim()
     } else {
-        valString = inputState.hostName.trim()
-        placeHolder = inputState.hostName.trim()
+        valString = currentHostName.trim()
+        placeHolder = currentHostName.trim()
     }
+
     Column(
         modifier = Modifier.fillMaxWidth().padding(start =6.dp, end =6.dp)) {
         Row(
@@ -103,9 +119,9 @@ fun InputFields(
             )
 
             GenericNumericField(
-                currentValue = inputState.portNumber,
+                currentValue = currentPort,
                 onValueChange = setPortNumber,
-                enabled = !uiState.isRunning,
+                enabled = !isRunning,
                 defaultValue = DefaultInputData.PORT_NUMBER,
                 label = "Port",
                 modifier = Modifier.width(width = 90.dp)
@@ -114,9 +130,9 @@ fun InputFields(
             )
 
             GenericNumericField(
-                currentValue = inputState.durationSecs,
+                currentValue = currentDuration,
                 onValueChange = setDuration,
-                enabled = !uiState.isRunning,
+                enabled = !isRunning,
                 defaultValue = DefaultInputData.DURATION,
                 label = "Duration",
                 modifier = Modifier.width(width = 120.dp),
@@ -131,7 +147,7 @@ fun InputFields(
         ) {
 
             GenericNumericField(
-                currentValue = inputState.parallelStreams,
+                currentValue = currentParallelStreams,
                 onValueChange = setParallelStreams,
                 enabled = !isRunning,
                 defaultValue = DefaultInputData.PARALLEL_STREAMS,
@@ -140,7 +156,7 @@ fun InputFields(
                 //colors = colors
             )
             GenericNumericField(
-                currentValue = inputState.skip,
+                currentValue = currentSkip,
                 onValueChange = setSkip,
                 enabled = !isRunning,
                 defaultValue = DefaultInputData.SKIP,
@@ -148,7 +164,7 @@ fun InputFields(
                 modifier = Modifier.width(width = 130.dp),//.padding(end = 8.dp).
                 colors = colors,
                 )
-            UploadDownload(inputData= inputState, uiState = uiState, uploadDownload)
+            UploadDownload(currentReverse, isRunning = isRunning, setUploadDownload = uploadDownload)
         }
     }
 }

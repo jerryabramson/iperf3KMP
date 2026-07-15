@@ -24,7 +24,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInpu
  */
 @Composable
 @Preview(name ="Project Bottom Bar", showBackground = true, showSystemUi = true)
-fun ProjectBottomBar(uiState: UiInputData = getSampleInputData(),
+fun ProjectBottomBar(currentDebugging: Boolean = getSampleInputData().isDebugging,
                      toggleDebug: () -> Unit = {}
 ) {
     val fontSize = 10.sp
@@ -46,6 +46,6 @@ fun ProjectBottomBar(uiState: UiInputData = getSampleInputData(),
                 color = MaterialTheme.colorScheme.tertiary
             )
         }
-        DebugOnOffToggle(uiState, toggleDebug)
+        DebugOnOffToggle(currentDebugging, toggleDebug)
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_6
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,7 +27,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInpu
 
 
 @Preview(name = "Debug Output Section", showBackground = true,
-    device = "spec:width=411dp,height=891dp", showSystemUi = true)
+    device = PIXEL_6, showSystemUi = true)
 @Composable
 fun DebugOutputSection(
     uiInputState: UiInputData = getSampleInputData(),

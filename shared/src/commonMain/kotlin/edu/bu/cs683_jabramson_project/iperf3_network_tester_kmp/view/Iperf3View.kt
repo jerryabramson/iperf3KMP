@@ -4,6 +4,7 @@ package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -17,29 +18,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-//import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_TYPE_NORMAL
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-//import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-//import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-//import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.ui.theme.Iperf3NetworkTesterTheme
-import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.ui.theme.mesloFontFamily
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.ui.theme.mesloFontFamily
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3RunViewModel
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
+import kotlinx.coroutines.currentCoroutineContext
 
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
+/**
+ * Composable function for displaying the Iperf3 screen. This screen includes
+ * UI elements like a top bar, bottom bar, and a body to manage and visualize
+ * Iperf3 execution and input states.
+ *
+ * @param viewModel The ViewModel instance of type [Iperf3RunViewModel] used
+ * to manage UI state and interactions. By default, it retrieves an instance
+ * using Hilt and the current ViewModelStoreOwner. Throws an error if no
+ * ViewModelStoreOwner is provided.
+ */
 //fun RunIperf3Screen(viewModel: Iperf3RunViewModel)
-fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= hiltViewModel(
 //    checkNotNull(
 //        LocalViewModelStoreOwner.current
 //    )
@@ -47,63 +49,81 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= 
 //        "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
 //    }, null
 //) {
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= hiltViewModel(
 {
     val uiExecutionState by viewModel.uiExecutionDataStateFlow.collectAsState()
     val uiInputState by viewModel.uiInputDataStateFlow.collectAsState()
     val monoStyle = mesloMonoTextStyle()
     val fieldColors = textFieldColors()
-    val context = "foo" //LocalContext.current
+    Iperf3NetworkTesterTheme(dynamicColor = true) {
+        Scaffold(
+            topBar = {
+                IperfTopBar(
+                    buttonAction = viewModel::launchOrCancel,
+                    saveButtonAction = viewModel::saveResult,
+                    currentRunning = uiExecutionState.isRunning,
+                    currentFinished = uiExecutionState.isFinished,
+                    currentSaved = uiExecutionState.isSaved
+                )
+            },
+            bottomBar = { IperfBottomBar(uiInputState, viewModel::toggleDebug) }
+        ) { padding ->
 
-    //viewModel.setContext(context)
-
-
-    Scaffold(
-        topBar =  { IperfTopBar(viewModel::launchOrCancel, viewModel::saveResult,  uiExecutionState) },
-        bottomBar =  { IperfBottomBar(uiInputState, viewModel::toggleDebug) }
-    ) { padding ->
-        Column(modifier = Modifier
-            .padding(padding)
-            .fillMaxSize()
-            .fillMaxSize()
-            .padding(horizontal = 10.dp)) {
-            /* Input rows */
-            InputFields(
-                uiState = uiExecutionState,
-                inputState = uiInputState,
-                isRunning =  uiExecutionState.isRunning,
-                uploadDownload = viewModel::setUploadDownload,
-                updateHostName =  viewModel::seHostName,
-                launch =  viewModel::launchOrCancel,
-                setDuration = viewModel::setDuration,
-                setPortNumber = viewModel::setPortNumber,
-                setParallelStreams = viewModel::setParallelStreams,
-                setSkip = viewModel::setSkip,
-                colors =  fieldColors,
-                style = MaterialTheme.typography.bodySmall
+            Column(
+                modifier = Modifier
+                    .padding(padding)
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            {
+                InputFields(
+                    currentHostName = uiInputState.hostName,
+                    currentPort = uiInputState.portNumber,
+                    currentDuration = uiInputState.durationSecs,
+                    currentParallelStreams = uiInputState.parallelStreams,
+                    currentSkip = uiInputState.skip,
+                    currentReverse = uiInputState.isReverse,
+                    isRunning = uiExecutionState.isRunning,
+                    updateHostName = viewModel::setHostName,
+                    uploadDownload = viewModel::setUploadDownload,
+                    launch = viewModel::launch,
+                    setDuration = viewModel::setDuration,
+                    setPortNumber = viewModel::setPortNumber,
+                    setParallelStreams = viewModel::setParallelStreams,
+                    setSkip = viewModel::setSkip,
+                    colors = fieldColors,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(10.dp))
 
-            /* Output rows */
-            ResultsRow(uiState = uiExecutionState, monoStyle = monoStyle)
-            RunningColumnSection(uiInputState, uiExecutionState)
-            IperfMessagesSection(uiState = uiExecutionState, inputData = uiInputState, monoStyle = monoStyle)
-            ErrorSection(uiExecutionState, monoStyle)
-            DebugOutputSection(uiInputState, uiExecutionState, monoStyle)
-
-
+                /* Output rows */
+                RunningColumnSection(
+                    uiState = uiExecutionState,
+                    isReverse =  uiInputState.isReverse,
+                    parallelStreams = uiInputState.parallelStreams,
+                    durationSecs = uiInputState.durationSecs,
+                )
+                ResultsRow(uiState = uiExecutionState, monoStyle)
+                IperfMessagesSection(uiState = uiExecutionState, isDebugMode = uiInputState.isDebugging)
+                ErrorSection(uiState = uiExecutionState, monoStyle)
+                DebugOutputSection(
+                    uiInputState = uiInputState,
+                    uiExecutionData = uiExecutionState
+                )
+            }
         }
     }
 }
 
 
-@Composable
-fun mesloMonoTextStyle(): TextStyle = TextStyle(
-    fontFamily = mesloFontFamily(),
-    fontSize = 14.sp,
-    letterSpacing = 0.2.sp,
-    color = MaterialTheme.colorScheme.onSurface
-)
 
+/**
+ * Custom Compose preview annotation that automatically generates previews for both light and dark themes.
+ * Each preview displays the UI with the system bars visible, uses the Pixel 9 Pro device configuration,
+ * and renders the background to accurately reflect theme-specific colors and contrast.
+ * This annotation simplifies the development workflow by combining common preview settings into a single reusable declaration.
+ */
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
 @Preview(name = "Light", showBackground = true, device =  Devices.PIXEL_9_PRO, showSystemUi = true)
@@ -112,9 +132,50 @@ annotation class PreviewLightDarkWithBackground
 @OptIn(ExperimentalMaterial3Api::class)
 @PreviewLightDarkWithBackground
 @Composable
-fun PreviewIperf3Screen() {
-    val monoStyle = mesloMonoTextStyle()
-    val fieldColors = textFieldColors()
+fun ScreenTestRunning() {
+    val sampleUiState: UiExecutionData = getSampleUiState(true)
+    ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData())
+}
+
+/**
+ * Composable function representing the "Test Finished" screen of the application.
+ *
+ * The screen displays a user interface designed for when the test execution has been completed.
+ * It uses various components, such as a top bar, bottom bar, and a main content body to
+ * display the finished test's input and output data. The screen supports both light and dark
+ * themes through a themed preview annotation.
+ *
+ * This function:
+ * - Retrieves a sample UI state using the `getSampleUiState` method with a finished test condition.
+ * - Applies the `Iperf3NetworkTesterTheme` for consistent theming across the UI components.
+ * - Utilizes a `Scaffold` to organize the top bar, main content, and bottom bar.
+ * - Populates the main content using the `ScreenBody` composable, passing required UI state
+ *   and input data as parameters.
+ *
+ * Annotations:
+ * - `@PreviewLightDarkWithBackground` is used to generate previews for both light and dark modes.
+ * - `@OptIn(ExperimentalMaterial3Api::class)` is used to enable experimental Material Design 3 APIs.
+ */
+@PreviewLightDarkWithBackground()
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScreenTestFinished() {
+    val sampleUiState: UiExecutionData = getSampleUiState(false)
+    ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData())
+}
+
+/**
+ * Composable function that initializes and displays the main screen layout for the Iperf3 Network Tester.
+ * It applies the application theme, renders a full-screen Surface, and arranges the top bar,
+ * bottom bar, and main content area using a Scaffold, passing the provided states to their respective components.
+ *
+ * @param uiState The current execution state holding test progress, logs, bandwidth data, and status flags.
+ * @param inputData The configuration data for the network test, including host, port, duration, streams, and other parameters.
+ */
+@Composable
+fun ScreenTestScaffold(uiState: UiExecutionData,
+                       inputData: UiInputData)
+{
     Iperf3NetworkTesterTheme(dynamicColor = true) {
         Surface(
             modifier = Modifier
@@ -124,44 +185,96 @@ fun PreviewIperf3Screen() {
         ) {
             /* Input rows */
             Scaffold(
-                topBar =  { IperfTopBar(buttonAction =  {}, saveButtonAction = {},  uiState = getSampleUiState()) },
-                bottomBar =  { IperfBottomBar(getSampleInputData()) {} },
+                topBar = { IperfTopBar(currentRunning = uiState.isRunning,  uiState.isRunning, buttonAction = {}, saveButtonAction = {}) },
+                bottomBar = { IperfBottomBar(getSampleInputData()) {} },
 
-            ) { padding ->
-                Column(modifier = Modifier
-                    .padding(padding))
-                {
-                    //HostInputRowPreview(fieldColors)
-                    InputFields(uiState =  getSampleUiState(),
-                        isRunning = getSampleUiState().isRunning,
-                        updateHostName = {},
-                        uploadDownload = {},
-                        launch = {},
-                        setDuration = {},
-                        setPortNumber = {},
-                        setParallelStreams = {},
-                        setSkip = {},
-                        colors = fieldColors,
-                        style = MaterialTheme.typography.bodySmall)
-                    Spacer(modifier = Modifier.height(10.dp))
+                ) { padding ->
+                ScreenBody(
+                    padding = padding,
+                    uiInputState = inputData,
+                    uiExecutionState = uiState
+                )
 
-                    /* Output rows */
-                    RunningColumnSection(getSampleInputData(), getSampleUiState())
-                    ResultsRow(getSampleUiState(), monoStyle)
-                    IperfMessagesSection(getSampleInputData(), getSampleUiState(), monoStyle)
-                    ErrorSection(getSampleUiState(), monoStyle)
-                    DebugOutputSection(uiInputState = getSampleInputData(),
-                        uiExecutionData = getSampleUiState(),
-                        monoStyle)
-                }
             }
         }
     }
 }
 
+
 /**
- * Preview for the run button.
+ * Renders the main content area of the screen, including input fields,
+ * execution status, results, and debug outputs.
+ *
+ * @param padding Layout padding applied to the root column.
+ * @param uiExecutionState Current state of the UI execution, including progress,
+ *                         results, and running status. Defaults to a sample state.
+ * @param uiInputState Current configuration of input parameters such as host,
+ *                     port, duration, and stream settings.
+ * @param updateHostName Callback invoked when the host name is updated.
+ * @param uploadDownload Callback invoked for upload or download operations.
+ * @param launch Callback invoked to initiate or launch the execution.
+ * @param setDuration Callback invoked when the duration parameter is updated.
+ * @param setPortNumber Callback invoked when the port number is updated.
+ * @param setParallelStreams Callback invoked when the number of parallel streams is updated.
+ * @param setSkip Callback invoked when the skip parameter is updated.
  */
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun ScreenBody(padding: PaddingValues,
+               uiExecutionState: UiExecutionData = getSampleUiState(false),
+               uiInputState: UiInputData,
+               updateHostName: (String) -> Unit = {},
+               uploadDownload: (String) -> Unit = {},
+               launch: () -> Unit = {},
+               setDuration: (String) -> Unit = {},
+               setPortNumber: (String) -> Unit = {},
+               setParallelStreams: (String) -> Unit = {},
+               setSkip: (String) -> Unit = {},
+)
+{
+    val monoStyle = mesloMonoTextStyle()
+    val fieldColors = textFieldColors()
+    Column(modifier = Modifier
+        .padding(padding))
+    {
+        InputFields(
+            currentHostName = uiInputState.hostName,
+            currentPort = uiInputState.portNumber,
+            currentDuration = uiInputState.durationSecs,
+            currentParallelStreams = uiInputState.parallelStreams,
+            currentSkip = uiInputState.skip,
+            currentReverse = uiInputState.isReverse,
+            isRunning = uiExecutionState.isRunning,
+            updateHostName = updateHostName,
+            uploadDownload = uploadDownload,
+            launch = launch,
+            setDuration = setDuration,
+            setPortNumber = setPortNumber,
+            setParallelStreams = setParallelStreams,
+            setSkip = setSkip,
+            colors = fieldColors,
+            style = MaterialTheme.typography.bodySmall
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        /* Output rows */
+        /* Output rows */
+        RunningColumnSection(
+            uiState = uiExecutionState,
+            isReverse = uiInputState.isReverse,
+            parallelStreams = uiInputState.parallelStreams,
+            durationSecs = uiInputState.durationSecs
+        )
+        ResultsRow(uiState = uiExecutionState, monoStyle)
+        IperfMessagesSection(uiState = uiExecutionState, isDebugMode = true)
+        ErrorSection(uiState = uiExecutionState, monoStyle)
+        DebugOutputSection(
+            uiInputState = uiInputState,
+            uiExecutionData = uiExecutionState
+        )
+    }
+}
+
 
 
 

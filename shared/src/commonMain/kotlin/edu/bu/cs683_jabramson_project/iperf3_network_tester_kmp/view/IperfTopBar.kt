@@ -21,9 +21,12 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExec
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(name ="Iperf Top Bar",showSystemUi = true)
 @Composable
-fun IperfTopBar(buttonAction: () -> Unit = {},
-                saveButtonAction: () -> Unit = {},
-                uiState: UiExecutionData = getSampleUiState()
+fun IperfTopBar(
+    currentRunning: Boolean = false,
+    currentFinished: Boolean = false,
+    currentSaved: Boolean = false,
+    buttonAction: () -> Unit = {},
+    saveButtonAction: () -> Unit = {},
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -32,9 +35,9 @@ fun IperfTopBar(buttonAction: () -> Unit = {},
         ),
 
         navigationIcon = {
-            SaveButton(isRunning = uiState.isRunning,
-                isFinished = uiState.isFinished,
-                isSaved = uiState.isSaved,
+            SaveButton(isRunning = currentRunning,
+                isFinished = currentFinished,
+                isSaved = currentSaved,
                 saveButtonAction = saveButtonAction)
         },
         title = {
@@ -57,7 +60,7 @@ fun IperfTopBar(buttonAction: () -> Unit = {},
         },
         actions = {
             RunButton(
-                isRunning = uiState.isRunning,
+                isRunning = currentRunning,
                 buttonAction = buttonAction
             )
         }

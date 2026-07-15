@@ -6,10 +6,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_6
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 
-@Preview("Save Button Preview", showBackground = true)
+@Preview("Save Button Preview", showBackground = true,
+    device = PIXEL_6, showSystemUi = true
+)
 @Composable
 fun SaveButton(isRunning: Boolean = false,
                isFinished: Boolean = true,

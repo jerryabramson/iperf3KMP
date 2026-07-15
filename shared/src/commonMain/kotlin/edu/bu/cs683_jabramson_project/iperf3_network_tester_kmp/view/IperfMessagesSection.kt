@@ -29,7 +29,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExec
 )
 @Composable
 fun IperfMessagesSection(
-    inputData: UiInputData = getSampleInputData(),
+    isDebugMode: Boolean,
     uiState: UiExecutionData = getSampleUiState(),
     monoStyle: TextStyle = mesloMonoTextStyle()
 ) {
@@ -38,7 +38,7 @@ fun IperfMessagesSection(
     val fontSize = 12.sp
     val style = monoStyle.copy(fontSize = fontSize)
     Column(modifier = Modifier.fillMaxWidth()) {
-        if (inputData.isDebugging || isActive || isErrors)
+        if (isDebugMode || isActive || isErrors)
         {
             Spacer(modifier = Modifier.height(1.dp))
             val defaultColor = if (uiState.returnCode != 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary

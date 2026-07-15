@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_6
 import androidx.compose.ui.tooling.preview.Preview
 
 
@@ -16,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
  * @param isRunning whether the UI is currently running
  * @param buttonAction the action to take when the run button is pressed
  */
-@Preview(name =  "Run Button")
+@Preview(name =  "Run Button", showBackground = true, device = PIXEL_6, showSystemUi = true)
 @Composable
 fun RunButton(isRunning: Boolean = true,
               buttonAction: () -> Unit = {})

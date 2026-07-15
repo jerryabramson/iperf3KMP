@@ -8,6 +8,6 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInpu
 fun IperfBottomBar(uiState: UiInputData = getSampleInputData(),
                    buttonAction: () -> Unit) {
     BottomAppBar {
-        ProjectBottomBar(uiState, buttonAction)
+        ProjectBottomBar(uiState.isDebugging, buttonAction)
     }
 }

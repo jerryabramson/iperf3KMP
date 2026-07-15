@@ -33,17 +33,21 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExec
 )
 @Composable
 fun RunningColumnSection(
-    uiInputData: UiInputData = getSampleInputData(),
     uiState: UiExecutionData = getSampleUiState(),
-) {
+    isReverse: Boolean = getSampleInputData().isReverse,
+    parallelStreams: Int = getSampleInputData().parallelStreams,
+    durationSecs: Int = getSampleInputData().durationSecs
+    ) {
     if (!uiState.isRunning) return
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
         LaunchingMessage(uiState.latestLine.isEmpty())
-        val (barColor, trackColor) = progressColors(uiInputData.isReverse)
+        val (barColor, trackColor) = progressColors(isReverse)
 
         if (uiState.bandWidth.isNotEmpty()) {
-            ProgressPercent(uiInputData, uiState)
+            //ProgressPercent(uiInputData, uiState)
+
+            ProgressPercent(isReverse = isReverse, parallelStreams = parallelStreams, durationSecs = durationSecs, uiState)
             LinearProgressIndicator(
                 progress = { uiState.progress },
                 modifier = Modifier.fillMaxWidth().height(10.dp),
@@ -85,16 +89,18 @@ fun progressColors(isReverse: Boolean): Pair<androidx.compose.ui.graphics.Color,
 
 
 @Composable
-fun ProgressPercent(uiInputData: UiInputData = getSampleInputData(),
+fun ProgressPercent(isReverse: Boolean = getSampleInputData().isReverse,
+                    parallelStreams: Int = getSampleInputData().parallelStreams,
+                    durationSecs: Int = getSampleInputData().durationSecs,
                     uiExecutionState: UiExecutionData = getSampleUiState()) {
-    val num = if (uiInputData.isReverse) 1f - uiExecutionState.progress else uiExecutionState.progress
+    val num = if (isReverse) 1f - uiExecutionState.progress else uiExecutionState.progress
     val percent = (num * 100).toInt()
 
     //@SuppressLint("DefaultLocale")
-    val iter = "iteration ${uiExecutionState.resultDataInProgress.intervalNumber} of ${uiInputData.durationSecs}"
+    val iter = "iteration ${uiExecutionState.resultDataInProgress.intervalNumber} of ${durationSecs}"
 
 
-    val streams = uiInputData.parallelStreams
+    val streams = parallelStreams
     Text(
         text = "${percent}% complete : $iter [$streams streams]",
         modifier = Modifier.fillMaxWidth(),

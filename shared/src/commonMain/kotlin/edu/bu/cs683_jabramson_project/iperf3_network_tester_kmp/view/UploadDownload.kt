@@ -2,6 +2,7 @@ package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
 
 //import android.R.attr.onClick
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -36,13 +37,13 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Upload
     showSystemUi = true)
 @Composable
 fun UploadDownload(
-    inputData: UiInputData = getSampleInputData(),
-    uiState: UiExecutionData = getSampleUiState(),
+    currentReverse: Boolean = true,
+    isRunning: Boolean = false,
     setUploadDownload: (String) -> Unit = {})
 {
-    val color = if (uiState.isRunning) RadioButtonDefaults.colors().disabledSelectedColor else RadioButtonDefaults.colors().selectedColor
-    val isReverse = inputData.isReverse
-    val selected = if (isReverse) "Download" else "Upload"
+    val color = if (isRunning) RadioButtonDefaults.colors().disabledSelectedColor else RadioButtonDefaults.colors().selectedColor
+
+    val selected = if (currentReverse) "Download" else "Upload"
 
     Column(
         horizontalAlignment = Alignment.Start,
@@ -51,9 +52,9 @@ fun UploadDownload(
     {
         listOf(DOWNLOAD, UPLOAD).forEach { text ->
             SelectableOption(
-                enabled = !uiState.isRunning,
-                selected = inputData.isReverse == isDownload(text),
-                onClick = { if (!uiState.isRunning) setUploadDownload(text) }
+                enabled = !isRunning,
+                selected = currentReverse == isDownload(text),
+                onClick = { if (!isRunning) setUploadDownload(text) }
             ) {
                 Text(
                     text = text,
