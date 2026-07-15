@@ -182,3 +182,25 @@ The debugging approach that ultimately isolated the (non-obvious) third root cau
 ## 9. Relevance to the Research
 
 This case study is included in the project's documentation because it captures a reproducible environment-configuration procedure for enabling MCP-based tool access in locally-hosted LLM agents across the three heterogeneous hardware targets used in this research (Apple Silicon, Nvidia GB10, AMD Strix Halo). Future environment setup — or replication by collaborators — on any of these platform types can reference §4–§7 directly rather than re-deriving the same fixes.
+
+# 10. Costs of using Calude
+
+```
+   Total cost:            $5.41
+   Total duration (API):  18m 11s
+   Total duration (wall): 1h 18m 41s
+   Total code changes:    261 lines added, 7 lines removed
+   Usage by model:                                                                                                                                                                                       claude-opus-4-8:  3.7k input, 4.9k output, 133.4k cache read, 23.6k cache write ($0.4436)
+    claude-haiku-4-5: 536 input, 15 output, 0 cache read, 0 cache write ($0.0006)
+    claude-sonnet-5:  10.9k input, 70.0k output, 10.4m cache read, 127.7k cache write ($4.96)
+
+ Current session
+   ███████                                          14% used
+   Resets 1:40am (America/New_York)
+
+   Current week (all models)
+   █                                                 2% used
+ Resets Jul 16 at 2pm (America/New_York)
+
+ Current week (Fable)                                0% used
+```
