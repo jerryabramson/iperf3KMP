@@ -104,7 +104,7 @@ fun ProgressPercent(isReverse: Boolean = getSampleInputData().isReverse,
     Text(
         text = "${percent}% complete : $iter [$streams streams]",
         modifier = Modifier.fillMaxWidth(),
-        fontSize = 18.sp,
+        fontSize = 16.sp,
         textAlign = TextAlign.Center,
     )
 }

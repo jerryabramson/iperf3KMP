@@ -58,7 +58,7 @@ User @Entity annotation
 data class ResultDataInProgress(
 
     // db keys
-    //val guid: UUID = UUID.randomUUID(),
+    //val guid: UUID = randomUUID()
     //val startTimeMillis: Long = System.currentTimeMillis(),
 
     // test input details

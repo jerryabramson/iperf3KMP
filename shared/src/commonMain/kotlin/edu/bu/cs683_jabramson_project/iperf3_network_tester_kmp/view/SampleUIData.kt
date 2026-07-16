@@ -2,25 +2,45 @@ package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.ResultDataInProgress
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.UnitConvertedData
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.fromHumanUnit
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.DefaultInputData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 
 class SampleUIData {
     val sampleOutputData = listOf(
-        "0.00-1.00   35.6 Mbits/sec Skipped",
-        "1.00-2.00   35.6 Mbits/sec Skipped",
-        "2.00-3.00   35.6 Mbits/sec 8 Streams ",
-        "3.00-4.00   35.6 Mbits/sec 8 Streams ",
-        "4.00-5.00   35.6 Mbits/sec 8 Streams ",
-        "5.00-6.00   35.6 Mbits/sec 8 Streams ",
-        "6.00-7.00   35.6 Mbits/sec 8 Streams ",
-        "7.00-8.00   35.6 Mbits/sec 8 Streams ",
-        "8.00-9.00   35.6 Mbits/sec 8 Streams ",
-        "9.00-10.00  35.6 Mbits/sec 8 Streams ",
-        "0.00-10.19  24.0 Mbits/sec sender",
-        "0.00-10.19  24.0 Mbits/sec receiver",
-
+        " 0.00-1.00  2.35 Gbits/sec  skipped",
+        " 1.00-2.00  2.35 Gbits/sec  skipped",
+        " 0.00-1.00  2.35 Gbits/sec  8 streams",
+        " 1.00-2.00  2.36 Gbits/sec  8 streams",
+        " 2.00-3.00  2.35 Gbits/sec  8 streams",
+        " 3.00-4.00  2.35 Gbits/sec  8 streams",
+        " 4.00-5.00  2.35 Gbits/sec  8 streams",
+        " 5.00-6.00  2.35 Gbits/sec  8 streams",
+        " 6.00-7.00  2.35 Gbits/sec  8 streams",
+        " 7.00-8.00  2.35 Gbits/sec  8 streams",
+        " 8.00-9.00  2.35 Gbits/sec  8 streams",
+        " 9.00-10.00 2.35 Gbits/sec  8 streams",
+        "10.00-11.00 2.35 Gbits/sec  8 streams",
+        "11.00-12.00 2.35 Gbits/sec  8 streams",
+        "12.00-13.00 2.35 Gbits/sec  8 streams",
+        "13.00-14.00 2.35 Gbits/sec  8 streams",
+        "14.00-15.00 2.36 Gbits/sec  8 streams",
+        "15.00-16.00 2.35 Gbits/sec  8 streams",
+        "16.00-17.00 2.35 Gbits/sec  8 streams",
+        "17.00-18.00 2.35 Gbits/sec  8 streams",
+        "18.00-19.00 2.35 Gbits/sec  8 streams",
+        "19.00-20.00 2.35 Gbits/sec  8 streams",
+        "20.00-21.00 2.36 Gbits/sec  8 streams",
+        "21.00-22.00 2.35 Gbits/sec  8 streams",
+        "22.00-23.00 2.36 Gbits/sec  8 streams",
+        "23.00-24.00 2.35 Gbits/sec  8 streams",
+        "24.00-25.00 2.35 Gbits/sec  8 streams",
+        "25.00-26.00 2.35 Gbits/sec  8 streams",
+        "26.00-27.00 2.35 Gbits/sec  8 streams",
+        "27.00-28.00 2.35 Gbits/sec  8 streams",
+        "28.00-29.00 2.36 Gbits/sec  8 streams",
+        "29.00-30.00 2.35 Gbits/sec  8 streams",
         ).toMutableList()
 
 
@@ -47,13 +67,24 @@ class SampleUIData {
         "Std Dev:      364.72 Mbits/sec",
     ).toMutableList()
 
+    val sampleMin: UnitConvertedData = UnitConvertedData(52.30, "Mbits/sec")
+    val sampleMax: UnitConvertedData = UnitConvertedData(163.00, "Mbits/sec")
+    val sampleAvg: UnitConvertedData = UnitConvertedData(140.00, "Mbits/sec")
+    val sampleMedian: UnitConvertedData = UnitConvertedData(153.00, "Mbits/sec")
+    val sampleStdDev = UnitConvertedData(33.33, "Mbits/sec")
     val sampleResultData = ResultDataInProgress(
         totalSamples = 10,
         totalOmitted = 2,
-        currentMax = UnitConvertedData(170.00, "Mbits/sec"),
-        currentAvg = UnitConvertedData(164.81, "Mbits/sec"),
-        currentMin = UnitConvertedData(81.20, "Mbits/sec"),
-        currentMedian = UnitConvertedData(121.60, "Mbits/sec"),
+        currentMax = sampleMax,
+        currentAvg = sampleAvg,
+        currentMin = sampleMin,
+        currentMedian = sampleMedian,
+        currentStandardDeviation = sampleStdDev,
+        maxRawBitsPerSec = fromHumanUnit(sampleMax),
+        minRawBitsPerSec = fromHumanUnit(sampleMin),
+        medianRawBitsPerSec = fromHumanUnit(sampleMedian),
+        avgRawBitsPerSec = fromHumanUnit(sampleAvg),
+        standardDeviationRawBitsPerSec = fromHumanUnit(sampleStdDev),
         intervalNumber = 1,
         basicBandWidthString = "191 Mbits/sec",
         localHostDetails = " Local Host:port $localHostPort",

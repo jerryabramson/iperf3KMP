@@ -54,7 +54,11 @@ fun fromHumanUnit(value: Double, unit: String): Double {
             else -> value
         }
         return rawBitsPerSec
-    }
+}
+
+fun fromHumanUnit(value: UnitConvertedData): Double {
+    return fromHumanUnit(value.value, value.unit)
+}
 
 fun fromHumanString(value: String, unit: String): UnitConvertedData {
     val rawBitsPerSec = fromHumanUnit(value.toDouble(), unit)

@@ -270,18 +270,8 @@ class Iperf3OutputMonitor {
     fun getCurrentLineResult() = currentResultDataInProgress
 }
 
-fun getDebugHeading(): String {
-    return "Interval,   rate,       Unit,   Avg, Min,  Max,  comment"
-
-}
-
-fun getDebugHeadingUL(): String {
-    val ul = //"%-12.12s %4.4s %-9.9s %7.7s %7.7s %7.7s %10.10s".format(
-        return " ------------, ----,  ---------,  -------,  -------,   -------"
-}
-
 fun getHeading(): String {
-    return "Interval,  rate,        Unit,         comment"
+    return "Interval    rate Unit         comment"
 }
 
 
@@ -289,7 +279,7 @@ fun getHeading(): String {
 fun getSampleSize(resultDataInProgress: ResultDataInProgress): String {
     var res = ""
     if (resultDataInProgress.totalSamples > 0) {
-        res = "Samples: $resultDataInProgress.totalSamples [$resultDataInProgress.totalOmitted omitted]"
+        res = "Samples: ${resultDataInProgress.totalSamples} [${resultDataInProgress.totalOmitted} omitted]"
             //Locale.US,
         //    resultDataInProgress.totalSamples,
         //    ,

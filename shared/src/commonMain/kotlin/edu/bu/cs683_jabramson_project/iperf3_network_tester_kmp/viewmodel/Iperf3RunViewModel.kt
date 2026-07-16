@@ -1,6 +1,7 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel
 
 
+import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 //import android.app.Application
@@ -13,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.database.ResultDatabase
 //
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.ResultDataInProgress
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.SimulatedRun
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getAverage
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMaximum
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMedian
@@ -153,6 +155,7 @@ class Iperf3RunViewModel() : ViewModel() {
 //     * Initialize the UI state.
 //     */
     init {
+
 //        Log.d(tag, "initialize UI state")
 //
 //        // Set up Room database and repository
@@ -394,80 +397,13 @@ class Iperf3RunViewModel() : ViewModel() {
 //     * @return The return code from the iperf3 binary.
 //     */
     suspend fun runIperf3(): Int {
-        var rc: Int = 0
-        var r: ResultDataInProgress = ResultDataInProgress()
-        r.intervalNumber = 0
-         try {
-             /**
-              * Prepare to launch the iperf3 library as a suspended function.
-              */
-             var p: Float = 0.0.toFloat()
-             var lastNumberOfMessages = 0
-             val zeroProgress = 0.0.toFloat()
-             val finishedProgress = 1.0.toFloat()
-             var runningProgress = zeroProgress
-             var lastIntervalCount = -1L
-             var iter = 0
-             updateProgress(0f)
-             while (iter++ < (5 + _uiInputDataStateFlow.value.durationSecs)) {
-                 // Cancel simulation
-                 if (!uiExecutionDataStateFlow.value.isRunning) break
-                 if (iter < 5) {
-                     delay(100.milliseconds * iter)
 
-                     _uiExecutionDataStateFlow.update {data ->
-                         data.copy(
-                             iperf3Messages = data.iperf3Messages.also { it.add(getSampleUiState().iperf3Messages[iter]) },
-                             outputLines = data.outputLines.also { it.add(getSampleUiState().outputLines[iter]) },
-                             latestLine = ""
-                         )
-                     }
-                 } else {
-                     delay(1.seconds)
-                     r.basicBandWidthString = "35.6 Mbits/sec"
-                     r.intervalNumber++
-                     _uiExecutionDataStateFlow.update { data ->
-                         data.copy(
-                             latestLine = r.basicBandWidthString,
-                             resultDataInProgress = r,
-                             bandWidth = "35.6 Mbits/sec",
-                             outputLines = data.outputLines.also { it.add(getSampleUiState().outputLines[iter]) },
-                         )
-                     }
-                     runningProgress = (lastIntervalCount).toFloat() / _uiInputDataStateFlow.value.durationSecs
-                     runningProgress = if (runningProgress > finishedProgress) finishedProgress else runningProgress
-                     runningProgress = if (runningProgress < zeroProgress) zeroProgress else runningProgress
-                     updateProgress(runningProgress)
-                     lastIntervalCount = r.intervalNumber
-                 }
-             }
-             runningProgress = if (runningProgress > finishedProgress) finishedProgress else runningProgress
-             runningProgress = if (runningProgress < zeroProgress) zeroProgress else runningProgress
-             updateProgress(runningProgress)
-             delay(400.milliseconds)
-             r.messages.add(getSampleUiState().iperf3Messages[iter++])
-             delay(400.milliseconds)
-             r.messages.add(getSampleUiState().iperf3Messages[iter++])
-             rc = 0
-             //Log.d(tag, "sync iperfManager.startTest() starts")
-             //_uiExecutionDataStateFlow.value.context,
-             //_uiInputDataStateFlow.value
-             //)
-             //Log.d(tag, "sync iperfManager.startTest() ends")
-
-             _uiExecutionDataStateFlow.update {
-                 it.copy(
-                     //resultDataInProgress = //iperfManager.getCurrentLineResult(),
-                     resultNumber = -1
-                 )
-             }
-        } catch (e: Exception) {
-             /* Shouldn't ever get here, since guards are already in place */
-             //e(tag, "Failed to run iperf3: ${e.message}", e)
-             saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to run iperf3: ${e.message}")
-             rc = -1
-        }
-
+        val rc = SimulatedRun(
+            updateProgress = ::updateProgress,                       // floating point track of progress
+            stdout = ::saveOutputLine,                               // output from iperf3
+            stderr = ::saveErrorLine,
+            params = _uiInputDataStateFlow.value,
+            onTestComplete = ::completeTest)
 
         //Update the UI state to show that the test is finished and
         // Provide the return code to the UI.
@@ -503,16 +439,10 @@ class Iperf3RunViewModel() : ViewModel() {
                 returnCode = rc,
                 isRunning = false,
                 isFinished = true,
-
-                // Only remember last choices for non-default user selections
             )
         }
-
-        // This should have already been called as part of iperfManager.runTest(), but just in case
-        //completeTest()
-
-        //Log.d(tag, "runIperf3 Completed, return code: $rc")
-        return 0
+        completeTest()
+        return rc
     }
 
     fun completeTest() {
