@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 fun SaveButton(isRunning: Boolean = false,
                isFinished: Boolean = true,
                isSaved: Boolean = false,
+               isSaving: Boolean = false,
                saveButtonAction: () -> Unit = {})
 {
     var buttonColor = MaterialTheme.colorScheme.primary
@@ -25,13 +26,19 @@ fun SaveButton(isRunning: Boolean = false,
     val fontSize = 9.sp
     val style = mesloMonoTextStyle().copy(fontSize = fontSize)
 
-    if (isRunning) {
-        buttonText = "Running"
+    if (isRunning && !isSaving) {
+        buttonText = "Running ..."
+    } else if (isSaving) {
+        buttonText = "Saving ..."
     }
-    if (isSaved && isFinished && !isRunning) {
+    if (isSaved && isFinished && !isRunning && !isSaving) {
         buttonColor = MaterialTheme.colorScheme.onSurfaceVariant
         buttonText = "Export"
         buttonTextColor = MaterialTheme.colorScheme.onSurface
+    } else if (isSaving) {
+        buttonColor = MaterialTheme.colorScheme.onErrorContainer
+        buttonTextColor = MaterialTheme.colorScheme.error
+        buttonText = "Saving ..."
     }
     Button(
         //modifier = Modifier.padding(end = 4.dp),
@@ -41,7 +48,7 @@ fun SaveButton(isRunning: Boolean = false,
         colors = ButtonDefaults.buttonColors(
             containerColor = buttonColor
         ),
-        enabled = !isRunning && isFinished
+        enabled = !isRunning && isFinished && !isSaving
     ) {
         Text(text = buttonText, color = buttonTextColor, style = style)
     }

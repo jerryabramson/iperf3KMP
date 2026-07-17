@@ -2,14 +2,17 @@ package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model
 
 //import androidx.room.Entity
 //import androidx.room.PrimaryKey
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.AppLocalDateTime
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.AppUUID
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.getAppCurrentTimeMillis
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.getAppLocalDateTime
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.getAppUUID
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.UnitConvertedData
-//import java.util.UUID
+
 
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.UuidTypeConverter
 //import androidx.room.TypeConverters
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.tobps
-//import java.time.LocalDateTime
-//import java.time.OffsetDateTime
 
 
 //@Entity(tableName="result_data") @TypeConverters(UuidTypeConverter::class)
@@ -17,11 +20,12 @@ data class ResultData(
 
     // Record creation details
     //@PrimaryKey
-//    val guid: UUID,
-    //val startTimeMillis: Long,
-    //val endTimeMillis: Long,
-//    val startDateTime: LocalDateTime,
-//    val endDateTime: LocalDateTime,
+    val guid: AppUUID,
+
+    val startTimeMillis: Long,
+    val endTimeMillis: Long,
+    val startDateTime: AppLocalDateTime,
+    val endDateTime: AppLocalDateTime,
 
 
     // Input Options for test
@@ -58,8 +62,9 @@ User @Entity annotation
 data class ResultDataInProgress(
 
     // db keys
-    //val guid: UUID = randomUUID()
-    //val startTimeMillis: Long = System.currentTimeMillis(),
+    val guid: AppUUID = getAppUUID(),
+
+    val startTimeMillis: Long = getAppCurrentTimeMillis().value,
 
     // test input details
     val isReverse: Boolean = false,
@@ -67,7 +72,7 @@ data class ResultDataInProgress(
     val parallelStreams: Int = -1,
     val skip: Int = -1,
 
-    //val startDateTime: LocalDateTime = OffsetDateTime.now().toLocalDateTime(),
+    val startDateTime: AppLocalDateTime = getAppLocalDateTime(),
     var localHost: String = "",
     var remoteHost: String = "",
     var localPort: Long = -1L,
@@ -122,9 +127,12 @@ fun createResultData(resultDataInProgress: ResultDataInProgress): ResultData =
     ResultData(
         // keys
         //guid = resultDataInProgress.guid,
-        //startTimeMillis = resultDataInProgress.startTimeMillis,
-        //startDateTime = resultDataInProgress.startDateTime,
-        //endDateTime = LocalDateTime.now(),
+        startTimeMillis = resultDataInProgress.startTimeMillis,
+        endTimeMillis = getAppCurrentTimeMillis().value,
+        startDateTime = resultDataInProgress.startDateTime,
+        endDateTime = getAppLocalDateTime(),
+
+        guid =  resultDataInProgress.guid,
 
         // Input Params
         direction = if (resultDataInProgress.isReverse) "Download" else "Upload",
@@ -151,5 +159,6 @@ fun createResultData(resultDataInProgress: ResultDataInProgress): ResultData =
         minbps = tobps(resultDataInProgress.minRawBitsPerSec),
         avgbps = tobps(resultDataInProgress.avgRawBitsPerSec),
         stdDevbps = tobps(resultDataInProgress.standardDeviationRawBitsPerSec),
-        medianbps = tobps(resultDataInProgress.medianRawBitsPerSec),
+        medianbps = tobps(resultDataInProgress.medianRawBitsPerSec)
+
     )

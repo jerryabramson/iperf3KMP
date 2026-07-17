@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.database.ResultDatabase
 //
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.ResultDataInProgress
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.createResultData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.SimulatedRun
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getAverage
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMaximum
@@ -33,6 +34,8 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view.getSampleUi
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getStandardDeviation
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.printLineResult
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UploadDownload.isDownload
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.NonCancellable.cancel
 import kotlinx.coroutines.delay
 
@@ -108,6 +111,7 @@ data class UiExecutionData(
     val isVerbose: Boolean = false,
     var isFinished: Boolean = false,
     val isSaved: Boolean = false,
+    val isSaving: Boolean = false,
     val returnCode: Int = 0,
     val lastLine: String = "",
     val resultNumber: Long = -1,
@@ -193,6 +197,7 @@ class Iperf3RunViewModel() : ViewModel() {
                 isFinished = false,
                 isVerbose = false,
                 isSaved = false,
+                isSaving = false,
                 returnCode = 0,
                 lastLine = "",
                 bandWidth = "",
@@ -272,21 +277,26 @@ class Iperf3RunViewModel() : ViewModel() {
     //
     fun saveResult() {
         if (!_uiExecutionDataStateFlow.value.isSaved) {
-//            viewModelScope.launch(Dispatchers.IO) {
-//                if (_uiExecutionDataStateFlow.value.resultDataInProgress.totalSamples > 0) {
-//                    val current =
-//                        createResultData(_uiExecutionDataStateFlow.value.resultDataInProgress)
-//                    if (current.reportedIterations > 0) {
-//                        resultDatabase.resultDataDao().insert(current)
-//                        Log.d(tag, "Saved result: ${current.guid}")
+            viewModelScope.launch(Dispatchers.IO) {
+                if (_uiExecutionDataStateFlow.value.resultDataInProgress.totalSamples > 0) {
+                    val current =
+                        createResultData(_uiExecutionDataStateFlow.value.resultDataInProgress)
+                    if (current.reportedIterations > 0) {
                         _uiExecutionDataStateFlow.update {
-                            it.copy(isSaved = true)
+                            it.copy(isSaving = true)
                         }
-//                    }
-//                }
-//            }
-//        } else {
-//          TODO("Export as CSV")
+
+                        delay(3.seconds)
+//                      resultDatabase.resultDataDao().insert(current)
+//                      Log.d(tag, "Saved result: ${current.guid}")
+                        _uiExecutionDataStateFlow.update {
+                            it.copy(isSaved = true, isSaving = false)
+                        }
+                    }
+                }
+            }
+        } else {
+          TODO("Export as CSV")
         }
     }
 
@@ -332,6 +342,7 @@ class Iperf3RunViewModel() : ViewModel() {
                 resultNumber = -1,
                 returnCode = 0,
                 isSaved = false,
+                isSaving = false
             )
         }
         /*

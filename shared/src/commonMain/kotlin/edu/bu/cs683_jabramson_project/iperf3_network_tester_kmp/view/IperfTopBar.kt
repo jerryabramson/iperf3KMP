@@ -24,6 +24,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExec
 fun IperfTopBar(
     currentRunning: Boolean = false,
     currentFinished: Boolean = false,
+    currentIsSaving: Boolean = false,
     currentSaved: Boolean = false,
     buttonAction: () -> Unit = {},
     saveButtonAction: () -> Unit = {},
@@ -35,9 +36,11 @@ fun IperfTopBar(
         ),
 
         navigationIcon = {
-            SaveButton(isRunning = currentRunning,
+            SaveButton(
+                isRunning = currentRunning,
                 isFinished = currentFinished,
                 isSaved = currentSaved,
+                isSaving = currentIsSaving,
                 saveButtonAction = saveButtonAction)
         },
         title = {

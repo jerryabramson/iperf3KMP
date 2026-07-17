@@ -7,7 +7,19 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Defaul
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 
-class SampleUIData {
+/**
+ * Provides sample data and pre-configured instances for testing and demonstration purposes.
+ * This class contains mock network test outputs, performance statistics, input configurations,
+ * and execution states typically used for UI state simulation or unit testing.
+ * 1. Sample output data
+ * 2. Sample input data
+ * 3. Sample execution states
+ * It serves as a static reference dataset for iPerf3 client scenarios and does not implement
+ * active state management or business logic.
+ *
+ * It is also used for the Jetpack Compose previews, ensuring consistent and accurate UI rendering.
+ */
+class SampleUiState {
     val sampleOutputData = listOf(
         " 0.00-1.00  2.35 Gbits/sec  skipped",
         " 1.00-2.00  2.35 Gbits/sec  skipped",
@@ -45,15 +57,15 @@ class SampleUIData {
 
 
 
-    val localHostPort  = "10.0.0.2.16:51088"
-    val remoteHostPort = "192.168.1.32:5201"
+    val sampleLocalHostPort  = "10.0.0.2.16:51088"
+    val sampleRemoteHostPort = "192.168.1.32:5201"
 
     val sampleIperf3Messages = listOf(
         "{iPerf JNI} 🚀 Initiating iPerf3 client request ...",
         "Connecting to host jabramson.com, port 5201",
         "Reverse mode, remote host 192.168.127.12 is sending",
-        " Local Host:port $localHostPort",
-        "Remote Host:port $remoteHostPort",
+        " Local Host:port $sampleLocalHostPort",
+        "Remote Host:port $sampleRemoteHostPort",
         "iperf Done.",
         "{iPerf JNI} 🚀 Test completed successfully."
     ).toMutableList()
@@ -72,7 +84,7 @@ class SampleUIData {
     val sampleAvg: UnitConvertedData = UnitConvertedData(140.00, "Mbits/sec")
     val sampleMedian: UnitConvertedData = UnitConvertedData(153.00, "Mbits/sec")
     val sampleStdDev = UnitConvertedData(33.33, "Mbits/sec")
-    val sampleResultData = ResultDataInProgress(
+    val sampleResultDataInProgress = ResultDataInProgress(
         totalSamples = 10,
         totalOmitted = 2,
         currentMax = sampleMax,
@@ -87,8 +99,8 @@ class SampleUIData {
         standardDeviationRawBitsPerSec = fromHumanUnit(sampleStdDev),
         intervalNumber = 1,
         basicBandWidthString = "191 Mbits/sec",
-        localHostDetails = " Local Host:port $localHostPort",
-        remoteHostDetails = "Remote Host:port $remoteHostPort",
+        localHostDetails = " Local Host:port $sampleLocalHostPort",
+        remoteHostDetails = "Remote Host:port $sampleRemoteHostPort",
         remotePort = 5201,
         messages = mutableListOf<String>()
     )
@@ -106,7 +118,7 @@ class SampleUIData {
         progress = 0.33.toFloat(),
         results = sampleStatistics,
         outputLines = sampleOutputData,
-        resultDataInProgress = sampleResultData,
+        resultDataInProgress = sampleResultDataInProgress,
         //errorLines = sampleErrorLines,
         latestLine = "some stuff",
         returnCode = 0
@@ -118,14 +130,14 @@ class SampleUIData {
         isFinished = true,
         results = sampleStatistics,
         outputLines = sampleOutputData,
-        resultDataInProgress = sampleResultData,
+        resultDataInProgress = sampleResultDataInProgress,
         errorLines = sampleErrorLines,
         latestLine = "some stuff",
         returnCode = 0,
         iperf3Messages = sampleIperf3Messages
     )
 
-    val sampleInputs = UiInputData(
+    val sampleInputData = UiInputData(
         hostName = DefaultInputData.HOST_NAME,
         hostField = DefaultInputData.HOST_FIELD,
         durationSecs = 10,
@@ -139,9 +151,17 @@ class SampleUIData {
 
 }
 
-fun getSampleUiState() = SampleUIData().sampleUiStateExampleRunning
-fun getSampleInputData() = SampleUIData().sampleInputs
+fun getSampleUiState() = getSampleUiState(true)
+fun getSampleInputData() = SampleUiState().sampleInputData
+
+/**
+ * Returns a sample UI state for testing or preview purposes.
+ * The state configuration is determined by the running status.
+ *
+ * @param isRunning whether the sample state should represent a running or finished execution
+ * @return a sample UI state instance
+ */
 fun getSampleUiState(isRunning: Boolean = true) =
-    if (isRunning) SampleUIData().sampleUiStateExampleRunning
-    else SampleUIData().sampleUiStateExampleFinished
+    if (isRunning) SampleUiState().sampleUiStateExampleRunning
+    else SampleUiState().sampleUiStateExampleFinished
 

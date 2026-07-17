@@ -23,12 +23,12 @@ import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_TYPE_NORMAL
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.ui.theme.Iperf3NetworkTesterTheme
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3RunViewModel
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
-import kotlinx.coroutines.currentCoroutineContext
+
 
 
 /**
@@ -66,7 +66,8 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= 
                     saveButtonAction = viewModel::saveResult,
                     currentRunning = uiExecutionState.isRunning,
                     currentFinished = uiExecutionState.isFinished,
-                    currentSaved = uiExecutionState.isSaved
+                    currentSaved = uiExecutionState.isSaved,
+                    currentIsSaving = uiExecutionState.isSaving,
                 )
             },
             bottomBar = { IperfBottomBar(uiInputState, viewModel::toggleDebug) }

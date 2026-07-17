@@ -4,6 +4,7 @@ package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils
 //import androidx.compose.ui.text.intl.Locale
 
 import androidx.compose.foundation.layout.IntrinsicSize
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.getAppUUID
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.ResultDataInProgress
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 //import java.util.Locale
@@ -38,7 +39,8 @@ class Iperf3OutputMonitor {
             isReverse = params.isReverse,
             duration = params.durationSecs,
             parallelStreams = params.parallelStreams,
-            skip = params.skip
+            skip = params.skip,
+            guid = getAppUUID()
 
         )
         gathered = false
