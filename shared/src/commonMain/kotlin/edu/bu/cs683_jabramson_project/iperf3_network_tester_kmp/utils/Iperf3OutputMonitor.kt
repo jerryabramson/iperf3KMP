@@ -192,8 +192,7 @@ class Iperf3OutputMonitor {
                                 }
                             }
                             currentIperf3RunningState.formattedOutputLine =
-                                formatString("%6d %-12.12s %4.4s %-9.9s %10.10s",
-                                    currentIperf3RunningState.totalSamples,
+                                formatString("%-12.12s %4.4s %-9.9s %10.10s",
                                     intervalString,
                                     bitRateString.trim(),
                                     bitRateUnitString,
@@ -276,8 +275,7 @@ class Iperf3OutputMonitor {
 }
 
 fun getHeading(): String =
-    formatString("%6.6s %-12.12s %4.4s %-9.9s %10.10s",
-        "sample",
+    formatString("%-12.12s %4.4s %-9.9s %10.10s",
         "Interval",
         "rate",
         "Unit",
