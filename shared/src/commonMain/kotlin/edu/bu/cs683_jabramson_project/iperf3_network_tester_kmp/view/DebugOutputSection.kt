@@ -37,7 +37,7 @@ fun DebugOutputSection(
     if (!uiInputState.isDebugging) return
     val fontSize = 13.sp
     val style = monoStyle.copy(fontSize = fontSize)
-    val color = if (uiExecutionData.resultDataInProgress.omitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
+    val color = if (uiExecutionData.iperf3RunningState.omitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
     Column(modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp)) {
 
         HorizontalDivider(

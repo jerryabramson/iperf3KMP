@@ -50,8 +50,8 @@ fun ResultsRow(
                 thickness = thick,
                 color = MaterialTheme.colorScheme.tertiary
             )
-            val src = getSource(uiState.resultDataInProgress)
-            val dest = getDest(uiState.resultDataInProgress)
+            val src = getSource(uiState.iperf3RunningState)
+            val dest = getDest(uiState.iperf3RunningState)
             Text(
                 text = src,
                 style = monoStyle.copy(fontSize = 15.sp),

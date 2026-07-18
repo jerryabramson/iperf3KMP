@@ -22,7 +22,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.toWholeNumber
-import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 
 
@@ -97,7 +96,7 @@ fun ProgressPercent(isReverse: Boolean = getSampleInputData().isReverse,
     val percent = (num * 100).toInt()
 
     //@SuppressLint("DefaultLocale")
-    val iter = "iteration ${uiExecutionState.resultDataInProgress.intervalNumber} of ${durationSecs}"
+    val iter = "iteration ${uiExecutionState.iperf3RunningState.intervalNumber} of ${durationSecs}"
 
 
     val streams = parallelStreams
@@ -116,11 +115,11 @@ fun BandwidthDisplay(uiState: UiExecutionData = getSampleUiState()) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val omittedResult = uiState.resultDataInProgress.omitted
-        val stalledResult = uiState.resultDataInProgress.stalled
+        val omittedResult = uiState.iperf3RunningState.omitted
+        val stalledResult = uiState.iperf3RunningState.stalled
         val color = if (!omittedResult && !stalledResult) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
         Text(
-            text = uiState.resultDataInProgress.basicBandWidthString,
+            text = uiState.iperf3RunningState.basicBandWidthString,
             color = color,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
@@ -134,9 +133,9 @@ fun BandwidthDisplay(uiState: UiExecutionData = getSampleUiState()) {
             thickness = 2.dp,
             color = MaterialTheme.colorScheme.primary
         )
-        val max = uiState.resultDataInProgress.currentMax
-        val min = uiState.resultDataInProgress.currentMin
-        val avg = uiState.resultDataInProgress.currentAvg
+        val max = uiState.iperf3RunningState.currentMax
+        val min = uiState.iperf3RunningState.currentMin
+        val avg = uiState.iperf3RunningState.currentAvg
 
         //val med = uiState.lineResult.currentMedian
         Row(
