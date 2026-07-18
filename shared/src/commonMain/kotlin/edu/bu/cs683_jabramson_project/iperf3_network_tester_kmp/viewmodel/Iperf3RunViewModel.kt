@@ -12,25 +12,25 @@ import androidx.lifecycle.viewModelScope
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.database.ResultDataRepository
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.database.ResultDatabase
 //
-import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.ResultDataInProgress
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.Iperf3RunningState
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.createResultData
-import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.simulatedRun
+
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getAverage
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMaximum
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMedian
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMinimum
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getSampleSize
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getStandardDeviation
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.IperfTestManage
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getAverage
-//
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMaximum
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMedian
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMinimum
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getSampleSize
-//
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getStandardDeviation
-//import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.printLineResult
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.Iperf3Executor
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getAverage
+
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMaximum
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMedian
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMinimum
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getSampleSize
+
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getStandardDeviation
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.printLineResult
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UploadDownload.isDownload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -111,8 +111,8 @@ data class UiExecutionData(
     val lastLine: String = "",
     val resultNumber: Long = -1,
     val numberOfMessages: Int = 0,
-    var resultDataInProgress: ResultDataInProgress =
-        ResultDataInProgress(
+    var iperf3RunningState: Iperf3RunningState =
+        Iperf3RunningState(
             isReverse = DefaultInputData.IS_REVERSE,
             duration = DefaultInputData.DURATION,
             parallelStreams = DefaultInputData.PARALLEL_STREAMS,
@@ -141,18 +141,18 @@ class Iperf3RunViewModel() : ViewModel() {
 
 
 
-    //
-//    private var iperfManager: IperfTestManage = IperfTestManage(
-//        updateProgress = ::updateProgress,                       // floating point track of progress
-//        stdout = ::saveOutputLine,                               // output from iperf3
-//        stderr = ::saveErrorLine,                                // errors from iperf3
-//        onTestComplete = { completeTest() }
-//    )
-//
-//
-//    /**
-//     * Initialize the UI state.
-//     */
+
+    private var iperf3Executor: Iperf3Executor = Iperf3Executor(
+        updateProgress = ::updateProgress,    // floating point track of progress
+        stdout = ::saveOutputLine,            // output from iperf3 callback
+        stderr = ::saveErrorLine,             // errors from iperf3 callback
+        onTestComplete = { completeTest() }   // test complete callback
+    )
+
+
+    /**
+     * Initialize the UI state.
+     */
     init {
 
 //        Log.d(tag, "initialize UI state")
@@ -198,68 +198,61 @@ class Iperf3RunViewModel() : ViewModel() {
                 bandWidth = "",
                 resultNumber = -1,
                 numberOfMessages = 0,
-                resultDataInProgress = ResultDataInProgress(), //.getCurrentLineResult(),
+                iperf3RunningState = Iperf3RunningState(), //.getCurrentLineResult(),
                 isDatabaseCreated = false
 
             )
         }
     }
 
-    //
-//
-//
-//
-//
-//    /**
-//     * Callback to save an output line from the iperf3 binary.
-//     * @param resultDataInProgress The output line from the process execution.
-//     */
-    fun saveOutputLine(resultDataInProgress: ResultDataInProgress, newMessage: Boolean = false) {
-//        val lineResultStr = printLineResult(resultDataInProgress)
+    /**
+     * Callback to save an output line from the iperf3 binary.
+     * @param iperf3RunningState The output line from the process execution.
+     */
+    fun saveOutputLine(iperf3RunningState: Iperf3RunningState, newMessage: Boolean = false) {
+        val lineResultStr = printLineResult(iperf3RunningState)
 //        Log.d(tag, "viewModel: saveOutputLine() -> $lineResultStr")
-//        val lastMessages = resultDataInProgress.messages.toMutableList()
-//
+        val lastMessages = iperf3RunningState.messages.toMutableList()
+
         if (newMessage) {
 //            lastMessages.forEach { Log.d(tag, "lastMessages: $it") }
             _uiExecutionDataStateFlow.update {
                 it.copy(
-                    iperf3Messages = resultDataInProgress.messages.toMutableList(),
-                    numberOfMessages = 5, //lastMessages.size,
-                    resultDataInProgress = resultDataInProgress
+                    iperf3Messages = iperf3RunningState.messages.toMutableList(),
+                    numberOfMessages = lastMessages.size,
+                    iperf3RunningState = iperf3RunningState
                 )
             }
         } else {
             _uiExecutionDataStateFlow.update { it ->
                 it.copy(
                     lastLine = it.latestLine,
-                    bandWidth = resultDataInProgress.basicBandWidthString,
-                    latestLine = resultDataInProgress.formattedOutputLine,
+                    bandWidth = iperf3RunningState.basicBandWidthString,
+                    latestLine = iperf3RunningState.formattedOutputLine,
                     outputLines = it.outputLines.also {
-                        if (resultDataInProgress.formattedOutputLine.isNotEmpty()) {
-                            it.add(resultDataInProgress.formattedOutputLine)
+                        if (iperf3RunningState.formattedOutputLine.isNotEmpty()) {
+                            it.add(iperf3RunningState.formattedOutputLine)
                         }
                     },
-                    resultNumber = resultDataInProgress.intervalNumber,
+                    resultNumber = iperf3RunningState.intervalNumber,
                     iperf3Messages = it.iperf3Messages.toMutableList(),
-                    resultDataInProgress = resultDataInProgress
+                    iperf3RunningState = iperf3RunningState
                 )
             }
-//
         }
     }
 
-    //
-//    /**
-//     * Callback to save an error line from the iperf3 binary.
-//     * @param aLine The error line from the process execution.
-//     */
-    fun saveErrorLine(resultDataInProgress: ResultDataInProgress, aLine: String = "") {
+    /**
+     * Callback to save an error line from the iperf3 binary.
+     * @param aLine The error line from the process execution.
+     */
+    fun saveErrorLine(iperf3RunningState: Iperf3RunningState, aLine: String = "") {
         // Log.d(tag, "stderr: $aLine")
         _uiExecutionDataStateFlow.update { data ->
             data.copy(
                 errorLines = data.errorLines.also { it.add(aLine) },
-                resultDataInProgress = resultDataInProgress,
-                latestLine = resultDataInProgress.rawOutputLine
+                iperf3RunningState = iperf3RunningState,
+                latestLine = iperf3RunningState.rawOutputLine
             )
         }
     }
@@ -273,9 +266,9 @@ class Iperf3RunViewModel() : ViewModel() {
     fun saveResult() {
         if (!_uiExecutionDataStateFlow.value.isSaved) {
             viewModelScope.launch(Dispatchers.IO) {
-                if (_uiExecutionDataStateFlow.value.resultDataInProgress.totalSamples > 0) {
+                if (_uiExecutionDataStateFlow.value.iperf3RunningState.totalSamples > 0) {
                     val current =
-                        createResultData(_uiExecutionDataStateFlow.value.resultDataInProgress)
+                        createResultData(_uiExecutionDataStateFlow.value.iperf3RunningState)
                     if (current.reportedIterations > 0) {
                         _uiExecutionDataStateFlow.update {
                             it.copy(isSaving = true)
@@ -349,10 +342,11 @@ class Iperf3RunViewModel() : ViewModel() {
 
 
         viewModelScope.launch { runIperf3() }
+
 //      Log.d(tag, "Async Launch Completed")
     }
 
-//
+
     /**
      * Return a valid number or reset to base  state if it is
      * either empty, or an invalid number.
@@ -378,7 +372,7 @@ class Iperf3RunViewModel() : ViewModel() {
         }
         completeTest()
 //      Log.d(tag, "Async Cancel Started")
-//      viewModelScope.launch {cancelTest() }
+        viewModelScope.launch {cancelTest() }
 //      Log.d(tag, "Async Cancel Completed")
     }
 
@@ -390,26 +384,21 @@ class Iperf3RunViewModel() : ViewModel() {
         } catch (e: Exception) {
             /* Shouldn't ever get here, since guards are already in place */
             //e(tag, "Failed to cancel iperf3: ${e.message}", e)
-            saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to cancel iperf3: ${e.message}")
+            saveErrorLine(_uiExecutionDataStateFlow.value.iperf3RunningState, "Failed to cancel iperf3: ${e.message}")
             rc = -1
         }
         return rc
     }
 
-    //
-//    /**
-//     * Run the iperf3 binary.
-//     * This must be a suspend function called from a coroutine.
-//     * @return The return code from the iperf3 binary.
-//     */
+    /**
+     * Run the iperf3 binary.
+     * This must be a suspend function called from a coroutine.
+     * @return The return code from the iperf3 binary.
+     */
     suspend fun runIperf3(): Int {
 
-        val rc = simulatedRun(
-            updateProgress = ::updateProgress,                       // floating point track of progress
-            stdout = ::saveOutputLine,                               // output from iperf3
-            stderr = ::saveErrorLine,
-            params = _uiInputDataStateFlow.value,
-            onTestComplete = ::completeTest)
+        val rc = iperf3Executor.startTest(params = _uiInputDataStateFlow.value)
+
 
         //Update the UI state to show that the test is finished and
         // Provide the return code to the UI.
@@ -417,14 +406,14 @@ class Iperf3RunViewModel() : ViewModel() {
             // Only need this on failure conditions
             _uiExecutionDataStateFlow.update { data -> data.copy(results = data.results.also { it.add("Error: Return Code = $rc") }) }
         }
-        val outputCount = _uiExecutionDataStateFlow.value.resultDataInProgress.intervalNumber
+        val outputCount = _uiExecutionDataStateFlow.value.iperf3RunningState.intervalNumber
         if (outputCount > 0) {
-            val exe = getSampleSize(_uiExecutionDataStateFlow.value.resultDataInProgress)
-            val max = getMaximum(_uiExecutionDataStateFlow.value.resultDataInProgress)
-            val min = getMinimum(_uiExecutionDataStateFlow.value.resultDataInProgress)
-            val avg = getAverage(_uiExecutionDataStateFlow.value.resultDataInProgress)
-            val med = getMedian(_uiExecutionDataStateFlow.value.resultDataInProgress)
-            val std = getStandardDeviation(_uiExecutionDataStateFlow.value.resultDataInProgress)
+            val exe = getSampleSize(_uiExecutionDataStateFlow.value.iperf3RunningState)
+            val max = getMaximum(_uiExecutionDataStateFlow.value.iperf3RunningState)
+            val min = getMinimum(_uiExecutionDataStateFlow.value.iperf3RunningState)
+            val avg = getAverage(_uiExecutionDataStateFlow.value.iperf3RunningState)
+            val med = getMedian(_uiExecutionDataStateFlow.value.iperf3RunningState)
+            val std = getStandardDeviation(_uiExecutionDataStateFlow.value.iperf3RunningState)
             //val src = getSource(_uiExecutionDataStateFlow.value.resultData)
             //val dest = getDest(_uiExecutionDataStateFlow.value.resultData)
             if (!exe.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(exe) }) }

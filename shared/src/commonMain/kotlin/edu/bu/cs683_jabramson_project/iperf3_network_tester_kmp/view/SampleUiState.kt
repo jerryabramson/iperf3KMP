@@ -1,6 +1,6 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
-import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.ResultDataInProgress
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.Iperf3RunningState
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.UnitConvertedData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.fromHumanUnit
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.DefaultInputData
@@ -84,7 +84,7 @@ class SampleUiState {
     val sampleAvg: UnitConvertedData = UnitConvertedData(140.00, "Mbits/sec")
     val sampleMedian: UnitConvertedData = UnitConvertedData(153.00, "Mbits/sec")
     val sampleStdDev = UnitConvertedData(33.33, "Mbits/sec")
-    val sampleResultDataInProgress = ResultDataInProgress(
+    val sampleIperf3RunningState = Iperf3RunningState(
         totalSamples = 10,
         totalOmitted = 2,
         currentMax = sampleMax,
@@ -118,7 +118,7 @@ class SampleUiState {
         progress = 0.33.toFloat(),
         results = sampleStatistics,
         outputLines = sampleOutputData,
-        resultDataInProgress = sampleResultDataInProgress,
+        iperf3RunningState = sampleIperf3RunningState,
         //errorLines = sampleErrorLines,
         latestLine = "some stuff",
         returnCode = 0
@@ -130,7 +130,7 @@ class SampleUiState {
         isFinished = true,
         results = sampleStatistics,
         outputLines = sampleOutputData,
-        resultDataInProgress = sampleResultDataInProgress,
+        iperf3RunningState = sampleIperf3RunningState,
         errorLines = sampleErrorLines,
         latestLine = "some stuff",
         returnCode = 0,

@@ -1118,7 +1118,7 @@ Let me read the other key files to understand the codebase and identify potentia
 102:     val lastLine: String = "",
 103:     val resultNumber: Long = -1,
 104:     val numberOfMessages: Int = 0,
-105:     //var resultDataInProgress: ResultDataInProgress =
+105:     //var iperf3RunningState: ResultDataInProgress =
 106:       //  ResultDataInProgress(
 107:         //    isReverse = DefaultInputData.IS_REVERSE,
 108:           //  duration = DefaultInputData.DURATION,
@@ -1202,7 +1202,7 @@ Let me read the other key files to understand the codebase and identify potentia
 186: //                bandWidth = "",
 187: //                resultNumber = -1,
 188: //                numberOfMessages = 0,
-189: //                resultDataInProgress = iperfManager.getCurrentLineResult(),
+189: //                iperf3RunningState = iperfManager.getCurrentLineResult(),
 190: //                isDatabaseCreated = false
 191: //
 192: //            )
@@ -1215,36 +1215,36 @@ Let me read the other key files to understand the codebase and identify potentia
 199: //
 200: //    /**
 201: //     * Callback to save an output line from the iperf3 binary.
-202: //     * @param resultDataInProgress The output line from the process execution.
+202: //     * @param iperf3RunningState The output line from the process execution.
 203: //     */
-204: //    fun saveOutputLine(resultDataInProgress: ResultDataInProgress, newMessage: Boolean = false) {
-205: //        val lineResultStr = printLineResult(resultDataInProgress)
+204: //    fun saveOutputLine(iperf3RunningState: ResultDataInProgress, newMessage: Boolean = false) {
+205: //        val lineResultStr = printLineResult(iperf3RunningState)
 206: //        Log.d(tag, "viewModel: saveOutputLine() -> $lineResultStr")
-207: //        val lastMessages = resultDataInProgress.messages.toMutableList()
+207: //        val lastMessages = iperf3RunningState.messages.toMutableList()
 208: //
 209: //        if (newMessage) {
 210: //            lastMessages.forEach { Log.d(tag, "lastMessages: $it") }
 211: //            _uiExecutionDataStateFlow.update {
 212: //                it.copy(
-213: //                    iperf3Messages = resultDataInProgress.messages.toMutableList(),
+213: //                    iperf3Messages = iperf3RunningState.messages.toMutableList(),
 214: //                    numberOfMessages = lastMessages.size,
-215: //                    resultDataInProgress =  resultDataInProgress
+215: //                    iperf3RunningState =  iperf3RunningState
 216: //                )
 217: //            }
 218: //        } else {
 219: //            _uiExecutionDataStateFlow.update { it ->
 220: //                it.copy(
 221: //                    lastLine = it.latestLine,
-222: //                    bandWidth = resultDataInProgress.basicBandWidthString,
-223: //                    latestLine = resultDataInProgress.formattedOutputLine,
+222: //                    bandWidth = iperf3RunningState.basicBandWidthString,
+223: //                    latestLine = iperf3RunningState.formattedOutputLine,
 224: //                    outputLines = it.outputLines.also {
-225: //                        if (resultDataInProgress.formattedOutputLine.isNotEmpty()) {
-226: //                            it.add(resultDataInProgress.formattedOutputLine)
+225: //                        if (iperf3RunningState.formattedOutputLine.isNotEmpty()) {
+226: //                            it.add(iperf3RunningState.formattedOutputLine)
 227: //                        }
 228: //                    },
-229: //                    resultNumber = resultDataInProgress.intervalNumber,
+229: //                    resultNumber = iperf3RunningState.intervalNumber,
 230: //                    iperf3Messages = it.iperf3Messages.toMutableList(),
-231: //                    resultDataInProgress =  resultDataInProgress
+231: //                    iperf3RunningState =  iperf3RunningState
 232: //                )
 233: //            }
 234: //
@@ -1255,13 +1255,13 @@ Let me read the other key files to understand the codebase and identify potentia
 239: //     * Callback to save an error line from the iperf3 binary.
 240: //     * @param aLine The error line from the process execution.
 241: //     */
-242: //    fun saveErrorLine(resultDataInProgress: ResultDataInProgress, aLine: String = "") {
+242: //    fun saveErrorLine(iperf3RunningState: ResultDataInProgress, aLine: String = "") {
 243: //        Log.d(tag, "stderr: $aLine")
 244: //        _uiExecutionDataStateFlow.update { data ->
 245: //            data.copy(
 246: //                errorLines = data.errorLines.also { it.add(aLine) },
-247: //                resultDataInProgress = resultDataInProgress,
-248: //                latestLine = resultDataInProgress.rawOutputLine
+247: //                iperf3RunningState = iperf3RunningState,
+248: //                latestLine = iperf3RunningState.rawOutputLine
 249: //            )
 250: //        }
 251: //    }
@@ -1273,9 +1273,9 @@ Let me read the other key files to understand the codebase and identify potentia
 257: //    fun saveResult() {
 258: //        if (!_uiExecutionDataStateFlow.value.isSaved) {
 259: //            viewModelScope.launch(Dispatchers.IO) {
-260: //                if (_uiExecutionDataStateFlow.value.resultDataInProgress.totalSamples > 0) {
+260: //                if (_uiExecutionDataStateFlow.value.iperf3RunningState.totalSamples > 0) {
 261: //                    val current =
-262: //                        createResultData(_uiExecutionDataStateFlow.value.resultDataInProgress)
+262: //                        createResultData(_uiExecutionDataStateFlow.value.iperf3RunningState)
 263: //                    if (current.reportedIterations > 0) {
 264: //                        resultDatabase.resultDataDao().insert(current)
 265: //                        Log.d(tag, "Saved result: ${current.guid}")
@@ -1400,7 +1400,7 @@ Let me read the other key files to understand the codebase and identify potentia
 384: //        } catch (e: Exception) {
 385: //            /* Shouldn't ever get here, since guards are already in place */
 386: //            e(tag, "Failed to cancel iperf3: ${e.message}", e)
-387: //            saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to cancel iperf3: ${e.message}")
+387: //            saveErrorLine(_uiExecutionDataStateFlow.value.iperf3RunningState, "Failed to cancel iperf3: ${e.message}")
 388: //            rc = -1
 389: //        }
 390: //        return rc
@@ -1427,14 +1427,14 @@ Let me read the other key files to understand the codebase and identify potentia
 411: //
 412: //            _uiExecutionDataStateFlow.update {
 413: //                it.copy(
-414: //                    resultDataInProgress = iperfManager.getCurrentLineResult(),
+414: //                    iperf3RunningState = iperfManager.getCurrentLineResult(),
 415: //                    resultNumber = -1
 416: //                )
 417: //            }
 418: //        } catch (e: Exception) {
 419: //            /* Shouldn't ever get here, since guards are already in place */
 420: //            e(tag, "Failed to run iperf3: ${e.message}", e)
-421: //            saveErrorLine(_uiExecutionDataStateFlow.value.resultDataInProgress, "Failed to run iperf3: ${e.message}")
+421: //            saveErrorLine(_uiExecutionDataStateFlow.value.iperf3RunningState, "Failed to run iperf3: ${e.message}")
 422: //            rc = -1
 423: //        }
 424: //
@@ -1445,14 +1445,14 @@ Let me read the other key files to understand the codebase and identify potentia
 429: //            // Only need this on failure conditions
 430: //            _uiExecutionDataStateFlow.update { data -> data.copy(results = data.results.also { it.add("Error: Return Code = $rc") }) }
 431: //        }
-432: //        val outputCount = _uiExecutionDataStateFlow.value.resultDataInProgress.intervalNumber
+432: //        val outputCount = _uiExecutionDataStateFlow.value.iperf3RunningState.intervalNumber
 433: //        if (outputCount > 0) {
-434: //            val exe = getSampleSize(_uiExecutionDataStateFlow.value.resultDataInProgress)
-435: //            val max = getMaximum(_uiExecutionDataStateFlow.value.resultDataInProgress)
-436: //            val min = getMinimum(_uiExecutionDataStateFlow.value.resultDataInProgress)
-437: //            val avg = getAverage(_uiExecutionDataStateFlow.value.resultDataInProgress)
-438: //            val med = getMedian(_uiExecutionDataStateFlow.value.resultDataInProgress)
-439: //            val std = getStandardDeviation(_uiExecutionDataStateFlow.value.resultDataInProgress)
+434: //            val exe = getSampleSize(_uiExecutionDataStateFlow.value.iperf3RunningState)
+435: //            val max = getMaximum(_uiExecutionDataStateFlow.value.iperf3RunningState)
+436: //            val min = getMinimum(_uiExecutionDataStateFlow.value.iperf3RunningState)
+437: //            val avg = getAverage(_uiExecutionDataStateFlow.value.iperf3RunningState)
+438: //            val med = getMedian(_uiExecutionDataStateFlow.value.iperf3RunningState)
+439: //            val std = getStandardDeviation(_uiExecutionDataStateFlow.value.iperf3RunningState)
 440: //            //val src = getSource(_uiExecutionDataStateFlow.value.resultData)
 441: //            //val dest = getDest(_uiExecutionDataStateFlow.value.resultData)
 442: //            if (!exe.isEmpty())  _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(exe) }) }
@@ -1741,7 +1741,7 @@ e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/UuidTypeConverter.kt:50:6 Unresolved reference 'TypeConverter'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/UuidTypeConverter.kt:57:6 Unresolved reference 'TypeConverter'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/utils/UuidTypeConverter.kt:63:6 Unresolved reference 'TypeConverter'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/DebugOutputSection.kt:38:37 Unresolved reference 'resultDataInProgress'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/DebugOutputSection.kt:38:37 Unresolved reference 'iperf3RunningState'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/DebugOutputSection.kt:49:24 Unresolved reference 'getHeading'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/GenericNumericField.kt:3:8 Unresolved reference 'android'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/GenericNumericField.kt:4:8 Unresolved reference 'android'.
@@ -1790,18 +1790,18 @@ e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/IperfTopBar.kt:49:48 Unresolved reference 'R'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ProjectBottomBar.kt:3:8 Unresolved reference 'android'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ProjectBottomBar.kt:4:8 Unresolved reference 'android'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ResultsRow.kt:53:41 Unresolved reference 'resultDataInProgress'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ResultsRow.kt:54:40 Unresolved reference 'resultDataInProgress'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ResultsRow.kt:53:41 Unresolved reference 'iperf3RunningState'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/ResultsRow.kt:54:40 Unresolved reference 'iperf3RunningState'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:3:8 Unresolved reference 'android'.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:92:6 Unresolved reference 'SuppressLint'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:94:26 Unresolved reference 'resultDataInProgress'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:112:37 Unresolved reference 'resultDataInProgress'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:113:37 Unresolved reference 'resultDataInProgress'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:116:28 Unresolved reference 'resultDataInProgress'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:130:27 Unresolved reference 'resultDataInProgress'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:131:27 Unresolved reference 'resultDataInProgress'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:132:27 Unresolved reference 'resultDataInProgress'.
-e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/SampleUIData.kt:74:9 No parameter with name 'resultDataInProgress' found.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:94:26 Unresolved reference 'iperf3RunningState'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:112:37 Unresolved reference 'iperf3RunningState'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:113:37 Unresolved reference 'iperf3RunningState'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:116:28 Unresolved reference 'iperf3RunningState'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:130:27 Unresolved reference 'iperf3RunningState'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:131:27 Unresolved reference 'iperf3RunningState'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/RunningColumnSection.kt:132:27 Unresolved reference 'iperf3RunningState'.
+e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/SampleUIData.kt:74:9 No parameter with name 'iperf3RunningState' found.
 e: file:///Users/jerry/git_storage/iperf3KMP/shared/src/commonMain/kotlin/edu/bu/cs683_jabramson_project/iperf3_network_tester/view/UploadDownload.kt:4:8 Unresolved reference 'android'.
 
 [Incubating] Problems report is available at: file:///Users/jerry/git_storage/iperf3KMP/build/reports/problems/problems-report.html
@@ -1842,7 +1842,7 @@ Now I have a clear picture of all the compiler errors. Let me categorize them:
    - `RunningColumnSection.kt` - `android.*`, `android.annotation.SuppressLint`
    - `UploadDownload.kt` - `android.*`
 
-2. **UiExecutionData missing `resultDataInProgress` field** - referenced in multiple view files
+2. **UiExecutionData missing `iperf3RunningState` field** - referenced in multiple view files
 
 3. **Missing `getHeading` function** - referenced in `DebugOutputSection.kt`
 
@@ -1853,7 +1853,7 @@ Now I have a clear picture of all the compiler errors. Let me categorize them:
 
 5. **ResultData.kt** - No parameter with name 'guid' found
 
-6. **SampleUIData.kt** - No parameter with name 'resultDataInProgress' found
+6. **SampleUIData.kt** - No parameter with name 'iperf3RunningState' found
 
 The root cause is clear: the codebase has Android-specific dependencies and references scattered throughout `commonMain`, and the ViewModel is entirely commented out. I need to figure out the right approach—either move Android-specific code to platform-specific source sets, add the missing dependencies, or create stub implementations for the desktop target.
 
@@ -1991,40 +1991,40 @@ The root cause is clear: the codebase has Android-specific dependencies and refe
 117:     var lastResult: String = "",
 118: )
 119: 
-120: fun createResultData(resultDataInProgress: ResultDataInProgress): ResultData =
+120: fun createResultData(iperf3RunningState: ResultDataInProgress): ResultData =
 121:     ResultData(
 122:         // keys
-123:         guid = resultDataInProgress.guid,
-124:         startTimeMillis = resultDataInProgress.startTimeMillis,
-125:         startDateTime = resultDataInProgress.startDateTime,
+123:         guid = iperf3RunningState.guid,
+124:         startTimeMillis = iperf3RunningState.startTimeMillis,
+125:         startDateTime = iperf3RunningState.startDateTime,
 126:         endDateTime = LocalDateTime.now(),
 127: 
 128:         // Input Params
-129:         direction = if (resultDataInProgress.isReverse) "Download" else "Upload",
-130:         duration =  resultDataInProgress.duration,
-131:         parallelStreams = resultDataInProgress.parallelStreams,
-132:         skip =  resultDataInProgress.skip,
+129:         direction = if (iperf3RunningState.isReverse) "Download" else "Upload",
+130:         duration =  iperf3RunningState.duration,
+131:         parallelStreams = iperf3RunningState.parallelStreams,
+132:         skip =  iperf3RunningState.skip,
 133: 
 134:         // final runtime results
-135:         localHostDetails = resultDataInProgress.rawLocalHostDetails,
-136:         remoteHostDetails = resultDataInProgress.rawRemoteHostDetails,
-137:         reportedOmitted = resultDataInProgress.totalOmitted,
-138:         reportedIterations = resultDataInProgress.totalOmitted + resultDataInProgress.totalSamples,
+135:         localHostDetails = iperf3RunningState.rawLocalHostDetails,
+136:         remoteHostDetails = iperf3RunningState.rawRemoteHostDetails,
+137:         reportedOmitted = iperf3RunningState.totalOmitted,
+138:         reportedIterations = iperf3RunningState.totalOmitted + iperf3RunningState.totalSamples,
 139:         endTimeMillis = System.currentTimeMillis(),
 140: 
 141:         // human-readable results
-142:         max = resultDataInProgress.currentMax,
-143:         min = resultDataInProgress.currentMin,
-144:         avg = resultDataInProgress.currentAvg,
-145:         median = resultDataInProgress.currentMedian,
-146:         standardDeviation = resultDataInProgress.currentStandardDeviation,
+142:         max = iperf3RunningState.currentMax,
+143:         min = iperf3RunningState.currentMin,
+144:         avg = iperf3RunningState.currentAvg,
+145:         median = iperf3RunningState.currentMedian,
+146:         standardDeviation = iperf3RunningState.currentStandardDeviation,
 147: 
 148:         // raw bps results
-149:         maxbps = tobps(resultDataInProgress.maxRawBitsPerSec),
-150:         minbps = tobps(resultDataInProgress.minRawBitsPerSec),
-151:         avgbps = tobps(resultDataInProgress.avgRawBitsPerSec),
-152:         stdDevbps = tobps(resultDataInProgress.standardDeviationRawBitsPerSec),
-153:         medianbps = tobps(resultDataInProgress.medianRawBitsPerSec),
+149:         maxbps = tobps(iperf3RunningState.maxRawBitsPerSec),
+150:         minbps = tobps(iperf3RunningState.minRawBitsPerSec),
+151:         avgbps = tobps(iperf3RunningState.avgRawBitsPerSec),
+152:         stdDevbps = tobps(iperf3RunningState.standardDeviationRawBitsPerSec),
+153:         medianbps = tobps(iperf3RunningState.medianRawBitsPerSec),
 154:     )
 
 (End of file - total 154 lines)
@@ -2037,7 +2037,7 @@ The root cause is clear: the codebase has Android-specific dependencies and refe
 
 _Thinking:_
 
-The `ResultData` data class has `@PrimaryKey val guid: UUID` commented out, but `createResultData()` at line 123 still tries to pass `guid = resultDataInProgress.guid`. This is a direct mismatch.
+The `ResultData` data class has `@PrimaryKey val guid: UUID` commented out, but `createResultData()` at line 123 still tries to pass `guid = iperf3RunningState.guid`. This is a direct mismatch.
 
 Let me also read the other problematic files to understand the full scope.
 
@@ -2619,55 +2619,55 @@ These references are only in `Iperf3View.kt` and the theme files don't exist. Le
 309: 
 310: 
 311: 
-312: fun getSampleSize(resultDataInProgress: ResultDataInProgress): String {
+312: fun getSampleSize(iperf3RunningState: ResultDataInProgress): String {
 313:     var res = ""
-314:     if (resultDataInProgress.totalSamples > 0) {
+314:     if (iperf3RunningState.totalSamples > 0) {
 315:         res = "Samples: %7d    [%d omitted]".format(
 316:             Locale.US,
-317:             resultDataInProgress.totalSamples,
-318:             resultDataInProgress.totalOmitted,
+317:             iperf3RunningState.totalSamples,
+318:             iperf3RunningState.totalOmitted,
 319: 
 320:         )
-321:         if (resultDataInProgress.totalStalled > 0) {
-322:             res += "  {%d stalled}".format(resultDataInProgress.totalStalled)
+321:         if (iperf3RunningState.totalStalled > 0) {
+322:             res += "  {%d stalled}".format(iperf3RunningState.totalStalled)
 323:         }
 324:     }
 325:     return res
 326: }
 327: 
-328: fun getMaximum(resultDataInProgress: ResultDataInProgress): String = if (resultDataInProgress.maxRawBitsPerSec > Double.MIN_VALUE)           "Maximum: ${toWholeNumber(resultDataInProgress.currentMax)}" else ""
+328: fun getMaximum(iperf3RunningState: ResultDataInProgress): String = if (iperf3RunningState.maxRawBitsPerSec > Double.MIN_VALUE)           "Maximum: ${toWholeNumber(iperf3RunningState.currentMax)}" else ""
 329: fun getMinimum(resultDataDataInProgress: ResultDataInProgress): String = if (resultDataDataInProgress.minRawBitsPerSec < Double.MAX_VALUE)   "Minimum: ${toWholeNumber(resultDataDataInProgress.currentMin)}" else ""
-330: fun getAverage(resultDataInProgress: ResultDataInProgress): String = if (resultDataInProgress.avgRawBitsPerSec >= 0)                         "Average: ${toWholeNumber(resultDataInProgress.currentAvg)}" else ""
-331: fun getMedian(resultDataInProgress: ResultDataInProgress): String = if (resultDataInProgress.medianRawBitsPerSec >= 0)                       " Median: ${toWholeNumber(resultDataInProgress.currentMedian)}" else ""
-332: fun getStandardDeviation(resultDataInProgress: ResultDataInProgress): String = if (resultDataInProgress.standardDeviationRawBitsPerSec >= 0) "Std Dev: ${toWholeNumber(resultDataInProgress.currentStandardDeviation)}" else ""
-333: fun getSource(resultDataInProgress: ResultDataInProgress): String = resultDataInProgress.localHostDetails
-334: fun getDest(resultDataInProgress: ResultDataInProgress): String = resultDataInProgress.remoteHostDetails
-335: fun printLineResult(resultDataInProgress: ResultDataInProgress): String {
+330: fun getAverage(iperf3RunningState: ResultDataInProgress): String = if (iperf3RunningState.avgRawBitsPerSec >= 0)                         "Average: ${toWholeNumber(iperf3RunningState.currentAvg)}" else ""
+331: fun getMedian(iperf3RunningState: ResultDataInProgress): String = if (iperf3RunningState.medianRawBitsPerSec >= 0)                       " Median: ${toWholeNumber(iperf3RunningState.currentMedian)}" else ""
+332: fun getStandardDeviation(iperf3RunningState: ResultDataInProgress): String = if (iperf3RunningState.standardDeviationRawBitsPerSec >= 0) "Std Dev: ${toWholeNumber(iperf3RunningState.currentStandardDeviation)}" else ""
+333: fun getSource(iperf3RunningState: ResultDataInProgress): String = iperf3RunningState.localHostDetails
+334: fun getDest(iperf3RunningState: ResultDataInProgress): String = iperf3RunningState.remoteHostDetails
+335: fun printLineResult(iperf3RunningState: ResultDataInProgress): String {
 336:     val out = StringBuilder()
 337:     out.append("LineResult\n ")
-338:     resultDataInProgress.messages.indices.forEach {
-339:         val m = resultDataInProgress.messages[it]
+338:     iperf3RunningState.messages.indices.forEach {
+339:         val m = iperf3RunningState.messages[it]
 340:         out.append("             messages[$it] = $m\n ")
 341:     }
-342:     out.append("        Local Host: ${resultDataInProgress.localHost}\n")
-343:     out.append("       Remote Host: ${resultDataInProgress.remoteHost}\n")
-344:     out.append("        Local Port: ${resultDataInProgress.localPort}\n")
-345:     out.append("       Remote Port: ${resultDataInProgress.remotePort}\n")
-346:     out.append("       Last Result: ${resultDataInProgress.lastResult}\n")
-347:     out.append("      Result Entry: ${resultDataInProgress.intervalNumber}\n")
-348:     out.append(" Current Bandwidth: ${resultDataInProgress.currentBandWidth}\n")
-349:     out.append("       Current Max: ${resultDataInProgress.currentMax}\n")
-350:     out.append("       Current Min: ${resultDataInProgress.currentMin}\n")
-351:     out.append("       Current Avg: ${resultDataInProgress.currentAvg}\n")
-352:     out.append("   Basic Bandwidth: ${resultDataInProgress.basicBandWidthString}\n")
-353:     out.append("    Formatted Line: ${resultDataInProgress.formattedOutputLine}\n")
-354:     out.append("  Connected String: ${resultDataInProgress.connectedString}\n")
-355:     out.append("           Timeout: ${resultDataInProgress.timeout}\n")
-356:     out.append("       Raw Average: ${resultDataInProgress.rawAverage}\n")
-357:     out.append("  Max Raw Bits/sec: ${resultDataInProgress.maxRawBitsPerSec}\n")
-358:     out.append("  Min Raw Bits/sec: ${resultDataInProgress.minRawBitsPerSec}\n")
-359:     out.append("  Avg Raw Bits/sec: ${resultDataInProgress.avgRawBitsPerSec}\n")
-360:     out.append("  Cur Raw Bits/sec: ${resultDataInProgress.currentRawBitsPerSec}\n")
+342:     out.append("        Local Host: ${iperf3RunningState.localHost}\n")
+343:     out.append("       Remote Host: ${iperf3RunningState.remoteHost}\n")
+344:     out.append("        Local Port: ${iperf3RunningState.localPort}\n")
+345:     out.append("       Remote Port: ${iperf3RunningState.remotePort}\n")
+346:     out.append("       Last Result: ${iperf3RunningState.lastResult}\n")
+347:     out.append("      Result Entry: ${iperf3RunningState.intervalNumber}\n")
+348:     out.append(" Current Bandwidth: ${iperf3RunningState.currentBandWidth}\n")
+349:     out.append("       Current Max: ${iperf3RunningState.currentMax}\n")
+350:     out.append("       Current Min: ${iperf3RunningState.currentMin}\n")
+351:     out.append("       Current Avg: ${iperf3RunningState.currentAvg}\n")
+352:     out.append("   Basic Bandwidth: ${iperf3RunningState.basicBandWidthString}\n")
+353:     out.append("    Formatted Line: ${iperf3RunningState.formattedOutputLine}\n")
+354:     out.append("  Connected String: ${iperf3RunningState.connectedString}\n")
+355:     out.append("           Timeout: ${iperf3RunningState.timeout}\n")
+356:     out.append("       Raw Average: ${iperf3RunningState.rawAverage}\n")
+357:     out.append("  Max Raw Bits/sec: ${iperf3RunningState.maxRawBitsPerSec}\n")
+358:     out.append("  Min Raw Bits/sec: ${iperf3RunningState.minRawBitsPerSec}\n")
+359:     out.append("  Avg Raw Bits/sec: ${iperf3RunningState.avgRawBitsPerSec}\n")
+360:     out.append("  Cur Raw Bits/sec: ${iperf3RunningState.currentRawBitsPerSec}\n")
 361:     return out.toString()
 362: }
 
@@ -3276,7 +3276,7 @@ _Thinking:_
 91: 
 92:     @SuppressLint("DefaultLocale")
 93:     val iter = String.format("iteration %d of %d",
-94:         uiExecutionState.resultDataInProgress.intervalNumber,
+94:         uiExecutionState.iperf3RunningState.intervalNumber,
 95:         uiInputData.durationSecs)
 96:     val streams = uiInputData.parallelStreams
 97:     Text(
@@ -3294,11 +3294,11 @@ _Thinking:_
 109:     Column(
 110:         horizontalAlignment = Alignment.CenterHorizontally,
 111:     ) {
-112:         val omittedResult = uiState.resultDataInProgress.omitted
-113:         val stalledResult = uiState.resultDataInProgress.stalled
+112:         val omittedResult = uiState.iperf3RunningState.omitted
+113:         val stalledResult = uiState.iperf3RunningState.stalled
 114:         val color = if (!omittedResult && !stalledResult) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
 115:         Text(
-116:             text = uiState.resultDataInProgress.basicBandWidthString,
+116:             text = uiState.iperf3RunningState.basicBandWidthString,
 117:             color = color,
 118:             textAlign = TextAlign.Center,
 119:             modifier = Modifier.fillMaxWidth(),
@@ -3312,9 +3312,9 @@ _Thinking:_
 127:             thickness = 2.dp,
 128:             color = MaterialTheme.colorScheme.primary
 129:         )
-130:         val max = uiState.resultDataInProgress.currentMax
-131:         val min = uiState.resultDataInProgress.currentMin
-132:         val avg = uiState.resultDataInProgress.currentAvg
+130:         val max = uiState.iperf3RunningState.currentMax
+131:         val min = uiState.iperf3RunningState.currentMin
+132:         val avg = uiState.iperf3RunningState.currentAvg
 133: 
 134:         //val med = uiState.lineResult.currentMedian
 135:         Row(
@@ -3389,7 +3389,7 @@ _Thinking:_
 
 _Thinking:_
 
-This file references `uiState.resultDataInProgress` (lines 94, 112, 113, 116, 130, 131, 132) but `UiExecutionData` doesn't have a `resultDataInProgress` field - it was commented out. Let me check the remaining files.
+This file references `uiState.iperf3RunningState` (lines 94, 112, 113, 116, 130, 131, 132) but `UiExecutionData` doesn't have a `iperf3RunningState` field - it was commented out. Let me check the remaining files.
 
 
 **Tool: read**
@@ -3561,7 +3561,7 @@ Again, `android.R.attr.onClick` is imported but never used. Let me check the rem
 35:     if (!uiInputState.isDebugging) return
 36:     val fontSize = 13.sp
 37:     val style = monoStyle.copy(fontSize = fontSize)
-38:     val color = if (uiExecutionData.resultDataInProgress.omitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
+38:     val color = if (uiExecutionData.iperf3RunningState.omitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
 39:     Column(modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp)) {
 40: 
 41:         HorizontalDivider(
@@ -3645,7 +3645,7 @@ Again, `android.R.attr.onClick` is imported but never used. Let me check the rem
 _Thinking:_
 
 `DebugOutputSection.kt` references:
-- Line 38: `uiExecutionData.resultDataInProgress.omitted` - `resultDataInProgress` doesn't exist in `UiExecutionData`
+- Line 38: `uiExecutionData.iperf3RunningState.omitted` - `iperf3RunningState` doesn't exist in `UiExecutionData`
 - Line 49: `getHeading()` - this function exists in `Iperf3OutputMonitor.kt` but the import is commented out on line 23
 
 Let me check the remaining files.
@@ -3717,8 +3717,8 @@ Let me check the remaining files.
 50:                 thickness = thick,
 51:                 color = MaterialTheme.colorScheme.tertiary
 52:             )
-53:             val src = getSource(uiState.resultDataInProgress)
-54:             val dest = getDest(uiState.resultDataInProgress)
+53:             val src = getSource(uiState.iperf3RunningState)
+54:             val dest = getDest(uiState.iperf3RunningState)
 55:             Text(
 56:                 text = src,
 57:                 style = monoStyle.copy(fontSize = 15.sp),
@@ -3765,7 +3765,7 @@ Let me check the remaining files.
 
 _Thinking:_
 
-`ResultsRow.kt` references `uiState.resultDataInProgress` at lines 53-54, but this field doesn't exist in `UiExecutionData`.
+`ResultsRow.kt` references `uiState.iperf3RunningState` at lines 53-54, but this field doesn't exist in `UiExecutionData`.
 
 Let me check `SampleUIData.kt`, `Iperf3Test.kt`, and `IperfTopBar.kt`.
 
@@ -3857,7 +3857,7 @@ Let me check `SampleUIData.kt`, `Iperf3Test.kt`, and `IperfTopBar.kt`.
 71:         progress = 0.33.toFloat(),
 72:         results = sampleStatistics,
 73:         outputLines = sampleOutputData,
-74:         resultDataInProgress = sampleResultData,
+74:         iperf3RunningState = sampleResultData,
 75:         //errorLines = sampleErrorLines,
 76:         latestLine = "some stuff",
 77:         returnCode = 0
@@ -3890,7 +3890,7 @@ Let me check `SampleUIData.kt`, `Iperf3Test.kt`, and `IperfTopBar.kt`.
 
 _Thinking:_
 
-`SampleUIData.kt` line 74 tries to pass `resultDataInProgress = sampleResultData` to `UiExecutionData`, but `UiExecutionData` doesn't have a `resultDataInProgress` field.
+`SampleUIData.kt` line 74 tries to pass `iperf3RunningState = sampleResultData` to `UiExecutionData`, but `UiExecutionData` doesn't have a `iperf3RunningState` field.
 
 Let me check the remaining files: `Iperf3Test.kt` and `IperfTopBar.kt`.
 
@@ -4234,14 +4234,14 @@ Files with unnecessary Android imports that are never actually used:
 - `UploadDownload.kt:4` - `import android.R.attr.onClick` (never used)
 
 ### Category 2: Missing fields in `UiExecutionData` data class
-The ViewModel is entirely commented out, but view files still reference `resultDataInProgress` field:
-- `UiExecutionData` data class has `resultDataInProgress` commented out (lines 105-111 of Iperf3RunViewModel.kt)
-- `DebugOutputSection.kt:38` - references `uiExecutionData.resultDataInProgress.omitted`
+The ViewModel is entirely commented out, but view files still reference `iperf3RunningState` field:
+- `UiExecutionData` data class has `iperf3RunningState` commented out (lines 105-111 of Iperf3RunViewModel.kt)
+- `DebugOutputSection.kt:38` - references `uiExecutionData.iperf3RunningState.omitted`
 
 
-- `ResultsRow.kt:53-54` - references `uiState.resultDataInProgress`
-- `RunningColumnSection.kt:94,112,113,116,130,131,132` - references `uiState.resultDataInProgress`
-- `SampleUIData.kt:74` - passes `resultDataInProgress = sampleResultData` to `UiExecutionData`
+- `ResultsRow.kt:53-54` - references `uiState.iperf3RunningState`
+- `RunningColumnSection.kt:94,112,113,116,130,131,132` - references `uiState.iperf3RunningState`
+- `SampleUIData.kt:74` - passes `iperf3RunningState = sampleResultData` to `UiExecutionData`
 
 ### Category 3: Missing `getHeading` import
 - `DebugOutputSection.kt:49` - calls `getHeading()` but import is commented out on line 23
@@ -4279,22 +4279,22 @@ These files are in `commonMain` but import `android.*` or `androidx.room` which 
 | `UploadDownload.kt:4` | `android.R.attr.onClick` — **never actually used** |
 | `ProjectBottomBar.kt:3-4` | `android.R`, `android.util.Log.e` — **never actually used** |
 
-### Category B: `UiExecutionData` missing `resultDataInProgress` field (4 files)
-The ViewModel class is entirely commented out (lines 122-649 of `Iperf3RunViewModel.kt`), and the `resultDataInProgress` field inside `UiExecutionData` (lines 105-111) is also commented out, but these files still reference it:
+### Category B: `UiExecutionData` missing `iperf3RunningState` field (4 files)
+The ViewModel class is entirely commented out (lines 122-649 of `Iperf3RunViewModel.kt`), and the `iperf3RunningState` field inside `UiExecutionData` (lines 105-111) is also commented out, but these files still reference it:
 
 | File | Lines |
 |---|---|
-| `DebugOutputSection.kt:38` | `uiExecutionData.resultDataInProgress.omitted` |
-| `ResultsRow.kt:53-54` | `getSource(uiState.resultDataInProgress)` |
-| `RunningColumnSection.kt:94,112,113,116,130,131,132` | 7 references to `resultDataInProgress` |
-| `SampleUIData.kt:74` | `resultDataInProgress = sampleResultData` in constructor call |
+| `DebugOutputSection.kt:38` | `uiExecutionData.iperf3RunningState.omitted` |
+| `ResultsRow.kt:53-54` | `getSource(uiState.iperf3RunningState)` |
+| `RunningColumnSection.kt:94,112,113,116,130,131,132` | 7 references to `iperf3RunningState` |
+| `SampleUIData.kt:74` | `iperf3RunningState = sampleResultData` in constructor call |
 
 ### Category C: Missing `getHeading` import (1 file)
 - `DebugOutputSection.kt:23` — import is commented out, but `getHeading()` is called on line 49
 
 ### Category D: `ResultData` — `guid` field removed but still used (1 file)
 - `ResultData.kt:19` — `@PrimaryKey val guid: UUID` is commented out
-- `ResultData.kt:123` — `createResultData()` still passes `guid = resultDataInProgress.guid`
+- `ResultData.kt:123` — `createResultData()` still passes `guid = iperf3RunningState.guid`
 
 ### Category E: Android-only APIs in `commonMain` (2 files)
 | File | Issue |
@@ -4315,14 +4315,14 @@ The ViewModel class is entirely commented out (lines 122-649 of `Iperf3RunViewMo
 ### Fix 1: Remove unused Android imports (A)
 Delete the unused `android.R.attr.*` imports from `GenericNumericField.kt`, `InputFields.kt`, `UploadDownload.kt`, `ProjectBottomBar.kt`.
 
-### Fix 2: Add `resultDataInProgress` field back to `UiExecutionData` (B)
-Add a nullable `resultDataInProgress` field to the `UiExecutionData` data class so views can reference it. Update `SampleUIData.kt` and the view files to handle null.
+### Fix 2: Add `iperf3RunningState` field back to `UiExecutionData` (B)
+Add a nullable `iperf3RunningState` field to the `UiExecutionData` data class so views can reference it. Update `SampleUIData.kt` and the view files to handle null.
 
 ### Fix 3: Uncomment `getHeading` import (C)
 Uncomment line 23 of `DebugOutputSection.kt`.
 
 ### Fix 4: Remove `guid` from `ResultData` constructor call (D)
-Remove `guid = resultDataInProgress.guid,` from `createResultData()` since `ResultData` no longer has a `guid` parameter.
+Remove `guid = iperf3RunningState.guid,` from `createResultData()` since `ResultData` no longer has a `guid` parameter.
 
 ### Fix 5: Remove/replace Android-only APIs in views (E, F)
 - **`Iperf3View.kt`**: Replace `hiltViewModel()` with a plain `viewModel()` or make the function accept `viewModel` as a parameter. Replace `LocalContext` usage. Replace `mesloFontFamily()` with a hardcoded font or Compose `FontFamily`. Remove `Iperf3NetworkTesterTheme` wrapper — just use `MaterialTheme` directly.
@@ -4387,10 +4387,10 @@ _Thinking:_
 Ah, it's not an import resolution issue at all. The import resolves fine. The actual error is a **type mismatch** on line 125:
 
 ```kotlin
-startDateTime = resultDataInProgress.startDateTime,
+startDateTime = iperf3RunningState.startDateTime,
 ```
 
-`ResultData.startDateTime` is declared as `LocalDateTime`, but `ResultDataInProgress.startDateTime` is declared as `OffsetDateTime` (line 69 of ResultData.kt). So when `createResultData()` tries to pass `resultDataInProgress.startDateTime` (an `OffsetDateTime`) into a `LocalDateTime` parameter, Kotlin complains about the type mismatch.
+`ResultData.startDateTime` is declared as `LocalDateTime`, but `ResultDataInProgress.startDateTime` is declared as `OffsetDateTime` (line 69 of ResultData.kt). So when `createResultData()` tries to pass `iperf3RunningState.startDateTime` (an `OffsetDateTime`) into a `LocalDateTime` parameter, Kotlin complains about the type mismatch.
 
 Let me verify by looking at the exact lines.
 
@@ -4404,7 +4404,7 @@ Argument type mismatch: actual type is 'LocalDateTime', but 'OffsetDateTime' was
 In `ResultData.kt`:
 - `ResultData.startDateTime` is declared as `LocalDateTime` (line 22)
 - `ResultDataInProgress.startDateTime` is declared as `OffsetDateTime` (line 69)
-- `createResultData()` passes `resultDataInProgress.startDateTime` into the `LocalDateTime` parameter — type mismatch
+- `createResultData()` passes `iperf3RunningState.startDateTime` into the `LocalDateTime` parameter — type mismatch
 
 Also, `OffsetDateTime` is imported but **never actually used** as a type (the field uses `LocalDateTime`).
 
@@ -4969,7 +4969,7 @@ Lines 3-4: `import android.R` and `import android.util.Log.e` — neither is use
 91: 
 92:     @SuppressLint("DefaultLocale")
 93:     val iter = String.format("iteration %d of %d",
-94:         uiExecutionState.resultDataInProgress.intervalNumber,
+94:         uiExecutionState.iperf3RunningState.intervalNumber,
 95:         uiInputData.durationSecs)
 96:     val streams = uiInputData.parallelStreams
 97:     Text(
@@ -4987,11 +4987,11 @@ Lines 3-4: `import android.R` and `import android.util.Log.e` — neither is use
 109:     Column(
 110:         horizontalAlignment = Alignment.CenterHorizontally,
 111:     ) {
-112:         val omittedResult = uiState.resultDataInProgress.omitted
-113:         val stalledResult = uiState.resultDataInProgress.stalled
+112:         val omittedResult = uiState.iperf3RunningState.omitted
+113:         val stalledResult = uiState.iperf3RunningState.stalled
 114:         val color = if (!omittedResult && !stalledResult) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
 115:         Text(
-116:             text = uiState.resultDataInProgress.basicBandWidthString,
+116:             text = uiState.iperf3RunningState.basicBandWidthString,
 117:             color = color,
 118:             textAlign = TextAlign.Center,
 119:             modifier = Modifier.fillMaxWidth(),
@@ -5005,9 +5005,9 @@ Lines 3-4: `import android.R` and `import android.util.Log.e` — neither is use
 127:             thickness = 2.dp,
 128:             color = MaterialTheme.colorScheme.primary
 129:         )
-130:         val max = uiState.resultDataInProgress.currentMax
-131:         val min = uiState.resultDataInProgress.currentMin
-132:         val avg = uiState.resultDataInProgress.currentAvg
+130:         val max = uiState.iperf3RunningState.currentMax
+131:         val min = uiState.iperf3RunningState.currentMin
+132:         val avg = uiState.iperf3RunningState.currentAvg
 133: 
 134:         //val med = uiState.lineResult.currentMedian
 135:         Row(
@@ -5407,40 +5407,40 @@ Now let me check `ResultData.kt` to see if the `guid` issue was fixed:
 118:     var lastResult: String = "",
 119: )
 120: 
-121: fun createResultData(resultDataInProgress: ResultDataInProgress): ResultData =
+121: fun createResultData(iperf3RunningState: ResultDataInProgress): ResultData =
 122:     ResultData(
 123:         // keys
-124:         guid = resultDataInProgress.guid,
-125:         startTimeMillis = resultDataInProgress.startTimeMillis,
-126:         startDateTime = resultDataInProgress.startDateTime,
+124:         guid = iperf3RunningState.guid,
+125:         startTimeMillis = iperf3RunningState.startTimeMillis,
+126:         startDateTime = iperf3RunningState.startDateTime,
 127:         endDateTime = LocalDateTime.now(),
 128: 
 129:         // Input Params
-130:         direction = if (resultDataInProgress.isReverse) "Download" else "Upload",
-131:         duration =  resultDataInProgress.duration,
-132:         parallelStreams = resultDataInProgress.parallelStreams,
-133:         skip =  resultDataInProgress.skip,
+130:         direction = if (iperf3RunningState.isReverse) "Download" else "Upload",
+131:         duration =  iperf3RunningState.duration,
+132:         parallelStreams = iperf3RunningState.parallelStreams,
+133:         skip =  iperf3RunningState.skip,
 134: 
 135:         // final runtime results
-136:         localHostDetails = resultDataInProgress.rawLocalHostDetails,
-137:         remoteHostDetails = resultDataInProgress.rawRemoteHostDetails,
-138:         reportedOmitted = resultDataInProgress.totalOmitted,
-139:         reportedIterations = resultDataInProgress.totalOmitted + resultDataInProgress.totalSamples,
+136:         localHostDetails = iperf3RunningState.rawLocalHostDetails,
+137:         remoteHostDetails = iperf3RunningState.rawRemoteHostDetails,
+138:         reportedOmitted = iperf3RunningState.totalOmitted,
+139:         reportedIterations = iperf3RunningState.totalOmitted + iperf3RunningState.totalSamples,
 140:         endTimeMillis = System.currentTimeMillis(),
 141: 
 142:         // human-readable results
-143:         max = resultDataInProgress.currentMax,
-144:         min = resultDataInProgress.currentMin,
-145:         avg = resultDataInProgress.currentAvg,
-146:         median = resultDataInProgress.currentMedian,
-147:         standardDeviation = resultDataInProgress.currentStandardDeviation,
+143:         max = iperf3RunningState.currentMax,
+144:         min = iperf3RunningState.currentMin,
+145:         avg = iperf3RunningState.currentAvg,
+146:         median = iperf3RunningState.currentMedian,
+147:         standardDeviation = iperf3RunningState.currentStandardDeviation,
 148: 
 149:         // raw bps results
-150:         maxbps = tobps(resultDataInProgress.maxRawBitsPerSec),
-151:         minbps = tobps(resultDataInProgress.minRawBitsPerSec),
-152:         avgbps = tobps(resultDataInProgress.avgRawBitsPerSec),
-153:         stdDevbps = tobps(resultDataInProgress.standardDeviationRawBitsPerSec),
-154:         medianbps = tobps(resultDataInProgress.medianRawBitsPerSec),
+150:         maxbps = tobps(iperf3RunningState.maxRawBitsPerSec),
+151:         minbps = tobps(iperf3RunningState.minRawBitsPerSec),
+152:         avgbps = tobps(iperf3RunningState.avgRawBitsPerSec),
+153:         stdDevbps = tobps(iperf3RunningState.standardDeviationRawBitsPerSec),
+154:         medianbps = tobps(iperf3RunningState.medianRawBitsPerSec),
 155:     )
 
 (End of file - total 155 lines)
@@ -5453,7 +5453,7 @@ Now let me check `ResultData.kt` to see if the `guid` issue was fixed:
 
 _Thinking:_
 
-The `guid` issue on line 124 is still there — `ResultData` no longer has a `guid` parameter (it was commented out), but `createResultData()` still passes `guid = resultDataInProgress.guid`. Let me check the ResultData data class:
+The `guid` issue on line 124 is still there — `ResultData` no longer has a `guid` parameter (it was commented out), but `createResultData()` still passes `guid = iperf3RunningState.guid`. Let me check the ResultData data class:
 
 
 **Tool: read**
@@ -5523,9 +5523,9 @@ The `guid` issue on line 124 is still there — `ResultData` no longer has a `gu
 
 _Thinking:_
 
-`ResultData` still has `val guid: UUID` on line 20 — the `@PrimaryKey` annotation was commented out but the parameter remains. And `createResultData()` passes `guid = resultDataInProgress.guid` on line 124. So that's not an error.
+`ResultData` still has `val guid: UUID` on line 20 — the `@PrimaryKey` annotation was commented out but the parameter remains. And `createResultData()` passes `guid = iperf3RunningState.guid` on line 124. So that's not an error.
 
-But line 126: `startDateTime = resultDataInProgress.startDateTime` — `resultDataInProgress.startDateTime` is `OffsetDateTime` (line 69) while `ResultData.startDateTime` is `LocalDateTime` (line 23). This is the type mismatch error.
+But line 126: `startDateTime = iperf3RunningState.startDateTime` — `iperf3RunningState.startDateTime` is `OffsetDateTime` (line 69) while `ResultData.startDateTime` is `LocalDateTime` (line 23). This is the type mismatch error.
 
 Let me also check `SampleUIData.kt` and `DebugOutputSection.kt`:
 
@@ -5617,7 +5617,7 @@ Let me also check `SampleUIData.kt` and `DebugOutputSection.kt`:
 71:         progress = 0.33.toFloat(),
 72:         results = sampleStatistics,
 73:         outputLines = sampleOutputData,
-74:         resultDataInProgress = sampleResultData,
+74:         iperf3RunningState = sampleResultData,
 75:         //errorLines = sampleErrorLines,
 76:         latestLine = "some stuff",
 77:         returnCode = 0
@@ -5650,7 +5650,7 @@ Let me also check `SampleUIData.kt` and `DebugOutputSection.kt`:
 
 _Thinking:_
 
-Line 74: `resultDataInProgress = sampleResultData` — this requires `UiExecutionData` to have a `resultDataInProgress` parameter. Let me check if it was added.
+Line 74: `iperf3RunningState = sampleResultData` — this requires `UiExecutionData` to have a `iperf3RunningState` parameter. Let me check if it was added.
 
 
 **Tool: read**
@@ -5689,7 +5689,7 @@ Line 74: `resultDataInProgress = sampleResultData` — this requires `UiExecutio
 102:     val lastLine: String = "",
 103:     val resultNumber: Long = -1,
 104:     val numberOfMessages: Int = 0,
-105:     var resultDataInProgress: ResultDataInProgress =
+105:     var iperf3RunningState: ResultDataInProgress =
 106:         ResultDataInProgress(
 107:             isReverse = DefaultInputData.IS_REVERSE,
 108:             duration = DefaultInputData.DURATION,
@@ -5715,7 +5715,7 @@ Line 74: `resultDataInProgress = sampleResultData` — this requires `UiExecutio
 
 _Thinking:_
 
-Good — `resultDataInProgress` is back in `UiExecutionData` on lines 105-111. Now let me check `DebugOutputSection.kt`:
+Good — `iperf3RunningState` is back in `UiExecutionData` on lines 105-111. Now let me check `DebugOutputSection.kt`:
 
 
 **Tool: read**
@@ -6358,7 +6358,7 @@ The build fails at `Iperf3RunViewModel.kt:5` before it gets to the other errors 
 ```
 23:    val startDateTime: LocalDateTime,
 70:    val startDateTime: LocalDateTime = OffsetDateTime.now().toLocalDateTime(),
-126:        startDateTime = resultDataInProgress.startDateTime,
+126:        startDateTime = iperf3RunningState.startDateTime,
 
 ```
 
@@ -6410,7 +6410,7 @@ _Thinking:_
 
 Good — `ResultDataInProgress.startDateTime` is now `LocalDateTime` (line 70), matching `ResultData.startDateTime` (line 23). The type mismatch was fixed.
 
-Now let me check the `ResultsRow.kt` and `DebugOutputSection.kt` references to `resultDataInProgress`:
+Now let me check the `ResultsRow.kt` and `DebugOutputSection.kt` references to `iperf3RunningState`:
 
 
 **Tool: read**
@@ -6432,8 +6432,8 @@ Now let me check the `ResultsRow.kt` and `DebugOutputSection.kt` references to `
 50:                 thickness = thick,
 51:                 color = MaterialTheme.colorScheme.tertiary
 52:             )
-53:             val src = getSource(uiState.resultDataInProgress)
-54:             val dest = getDest(uiState.resultDataInProgress)
+53:             val src = getSource(uiState.iperf3RunningState)
+54:             val dest = getDest(uiState.iperf3RunningState)
 55:             Text(
 56:                 text = src,
 57:                 style = monoStyle.copy(fontSize = 15.sp),
@@ -6450,7 +6450,7 @@ Now let me check the `ResultsRow.kt` and `DebugOutputSection.kt` references to `
 
 _Thinking:_
 
-Good — `ResultsRow.kt:53-54` still references `uiState.resultDataInProgress` which now exists in `UiExecutionData`. That should be fine.
+Good — `ResultsRow.kt:53-54` still references `uiState.iperf3RunningState` which now exists in `UiExecutionData`. That should be fine.
 
 Now let me check `DebugOutputSection.kt`:
 
@@ -6474,7 +6474,7 @@ Now let me check `DebugOutputSection.kt`:
 37:     if (!uiInputState.isDebugging) return
 38:     val fontSize = 13.sp
 39:     val style = monoStyle.copy(fontSize = fontSize)
-40:     val color = if (uiExecutionData.resultDataInProgress.omitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
+40:     val color = if (uiExecutionData.iperf3RunningState.omitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
 41:     Column(modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp)) {
 
 (Showing lines 37-41 of 111. Use offset=42 to continue.)
@@ -6487,7 +6487,7 @@ Now let me check `DebugOutputSection.kt`:
 
 _Thinking:_
 
-Good — `DebugOutputSection.kt:40` now has access to `uiExecutionData.resultDataInProgress` since the field was added back to `UiExecutionData`.
+Good — `DebugOutputSection.kt:40` now has access to `uiExecutionData.iperf3RunningState` since the field was added back to `UiExecutionData`.
 
 Now let me do a comprehensive summary. The 6 remaining compiler errors are all simple — just unused Android imports in `commonMain`. Let me summarize the full status.
 
@@ -6524,7 +6524,7 @@ Here's the current status review:
 - `Iperf3OutputMonitor.kt` — `@SuppressLint` annotation commented out, `android.annotation` import commented out
 - `IperfTopBar.kt` — hardcoded string `"iperf3 Network Tester"` instead of `stringResource(R.string.app_name)`
 - `Iperf3Test.kt` — Icon with `R.drawable` commented out
-- `resultDataInProgress` field added back to `UiExecutionData` (lines 105-111)
+- `iperf3RunningState` field added back to `UiExecutionData` (lines 105-111)
 - `getHeading` import uncommented in `DebugOutputSection.kt`
 
 Want me to fix the remaining 6 errors and clean up the other issues, or just leave it as is?

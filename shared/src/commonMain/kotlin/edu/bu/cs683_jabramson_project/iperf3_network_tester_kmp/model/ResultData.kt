@@ -59,106 +59,42 @@ This is the data entity class.
 User @Entity annotation
  */
 
-data class ResultDataInProgress(
-
-    // db keys
-    val guid: AppUUID = getAppUUID(),
-
-    val startTimeMillis: Long = getAppCurrentTimeMillis().value,
-
-    // test input details
-    val isReverse: Boolean = false,
-    val duration: Int = -1,
-    val parallelStreams: Int = -1,
-    val skip: Int = -1,
-
-    val startDateTime: AppLocalDateTime = getAppLocalDateTime(),
-    var localHost: String = "",
-    var remoteHost: String = "",
-    var localPort: Long = -1L,
-    var remotePort: Long = -1L,
-    var localHostDetails: String = "",
-    var rawLocalHostDetails: String = "",
-    var remoteHostDetails: String = "",
-    var rawRemoteHostDetails: String = "",
-
-    // iperf3 messages
-    var messages: MutableList<String> = emptyList<String>().toMutableList(),
-
-    // interval number (0 to duration, can go backwards with Omit)
-    var intervalNumber: Long = -1,
-    var totalSamples: Long = -1,
-    var totalOmitted: Long = 0,
-
-    // statistics - converted to human-readable units
-    var currentBandWidth : UnitConvertedData = UnitConvertedData(),
-    var currentMax: UnitConvertedData = UnitConvertedData(),
-    var currentMin: UnitConvertedData = UnitConvertedData(),
-    var currentAvg: UnitConvertedData = UnitConvertedData(),
-    var currentMedian: UnitConvertedData = UnitConvertedData(),
-    var currentStandardDeviation: UnitConvertedData = UnitConvertedData(),
-
-    // processed output from iperf3
-    var basicBandWidthString: String = "",
-    var debugFormattedOutputLine: String = "",
-    var formattedOutputLine: String = "",
-    var connectedString: String = "",
-    var timeout: String = "",
-    var rawAverage: String = "",
-    var rawOutputLine: String = "",
-    var omitted: Boolean = false,
-    var stalled: Boolean = false,
-    var consecutiveStalled: Int = 0,
-    var totalStalled: Int = 0,
-
-
-    // statistics - raw numeric values
-    var maxRawBitsPerSec: Double = Double.MIN_VALUE,
-    var minRawBitsPerSec: Double = Double.MAX_VALUE,
-    var avgRawBitsPerSec: Double = 0.toDouble(),
-    var medianRawBitsPerSec: Double = 0.toDouble(),
-    var currentRawBitsPerSec: Double = 0.toDouble(),
-    var standardDeviationRawBitsPerSec: Double = 0.toDouble(),
-
-    var lastResult: String = "",
-)
-
-fun createResultData(resultDataInProgress: ResultDataInProgress): ResultData =
+fun createResultData(iperf3RunningState: Iperf3RunningState): ResultData =
     ResultData(
         // keys
-        //guid = resultDataInProgress.guid,
-        startTimeMillis = resultDataInProgress.startTimeMillis,
+        //guid = iperf3RunningState.guid,
+        startTimeMillis = iperf3RunningState.startTimeMillis,
         endTimeMillis = getAppCurrentTimeMillis().value,
-        startDateTime = resultDataInProgress.startDateTime,
+        startDateTime = iperf3RunningState.startDateTime,
         endDateTime = getAppLocalDateTime(),
 
-        guid =  resultDataInProgress.guid,
+        guid =  iperf3RunningState.guid,
 
         // Input Params
-        direction = if (resultDataInProgress.isReverse) "Download" else "Upload",
-        duration =  resultDataInProgress.duration,
-        parallelStreams = resultDataInProgress.parallelStreams,
-        skip =  resultDataInProgress.skip,
+        direction = if (iperf3RunningState.isReverse) "Download" else "Upload",
+        duration =  iperf3RunningState.duration,
+        parallelStreams = iperf3RunningState.parallelStreams,
+        skip =  iperf3RunningState.skip,
 
         // final runtime results
-        localHostDetails = resultDataInProgress.rawLocalHostDetails,
-        remoteHostDetails = resultDataInProgress.rawRemoteHostDetails,
-        reportedOmitted = resultDataInProgress.totalOmitted,
-        reportedIterations = resultDataInProgress.totalOmitted + resultDataInProgress.totalSamples,
+        localHostDetails = iperf3RunningState.rawLocalHostDetails,
+        remoteHostDetails = iperf3RunningState.rawRemoteHostDetails,
+        reportedOmitted = iperf3RunningState.totalOmitted,
+        reportedIterations = iperf3RunningState.totalOmitted + iperf3RunningState.totalSamples,
         //endTimeMillis = System.currentTimeMillis(),
 
         // human-readable results
-        max = resultDataInProgress.currentMax,
-        min = resultDataInProgress.currentMin,
-        avg = resultDataInProgress.currentAvg,
-        median = resultDataInProgress.currentMedian,
-        standardDeviation = resultDataInProgress.currentStandardDeviation,
+        max = iperf3RunningState.currentMax,
+        min = iperf3RunningState.currentMin,
+        avg = iperf3RunningState.currentAvg,
+        median = iperf3RunningState.currentMedian,
+        standardDeviation = iperf3RunningState.currentStandardDeviation,
 
         // raw bps results
-        maxbps = tobps(resultDataInProgress.maxRawBitsPerSec),
-        minbps = tobps(resultDataInProgress.minRawBitsPerSec),
-        avgbps = tobps(resultDataInProgress.avgRawBitsPerSec),
-        stdDevbps = tobps(resultDataInProgress.standardDeviationRawBitsPerSec),
-        medianbps = tobps(resultDataInProgress.medianRawBitsPerSec)
+        maxbps = tobps(iperf3RunningState.maxRawBitsPerSec),
+        minbps = tobps(iperf3RunningState.minRawBitsPerSec),
+        avgbps = tobps(iperf3RunningState.avgRawBitsPerSec),
+        stdDevbps = tobps(iperf3RunningState.standardDeviationRawBitsPerSec),
+        medianbps = tobps(iperf3RunningState.medianRawBitsPerSec)
 
     )
