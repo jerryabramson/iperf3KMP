@@ -7,7 +7,7 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-suspend fun SimulatedRun(
+suspend fun simulatedRun(
     updateProgress: (Float) -> Unit,
     stdout: (ResultDataInProgress, Boolean) -> Unit,
     stderr: (ResultDataInProgress, String) -> Unit,

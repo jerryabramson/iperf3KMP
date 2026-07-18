@@ -1,7 +1,6 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel
 
 
-import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 //import android.app.Application
@@ -15,14 +14,13 @@ import androidx.lifecycle.viewModelScope
 //
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.ResultDataInProgress
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.createResultData
-import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.SimulatedRun
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.simulatedRun
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getAverage
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMaximum
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMedian
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getMinimum
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getSampleSize
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getStandardDeviation
-import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view.getSampleUiState
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.IperfTestManage
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getAverage
 //
@@ -36,7 +34,6 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view.getSampleUi
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UploadDownload.isDownload
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.NonCancellable.cancel
 import kotlinx.coroutines.delay
 
 
@@ -45,8 +42,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -409,7 +404,7 @@ class Iperf3RunViewModel() : ViewModel() {
 //     */
     suspend fun runIperf3(): Int {
 
-        val rc = SimulatedRun(
+        val rc = simulatedRun(
             updateProgress = ::updateProgress,                       // floating point track of progress
             stdout = ::saveOutputLine,                               // output from iperf3
             stderr = ::saveErrorLine,
