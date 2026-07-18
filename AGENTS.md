@@ -2,8 +2,9 @@
 
 ## Project structure
 
-- **3 modules:** `:shared` (KMP library), `:androidApp` (Android app), `:desktopApp` (JVM desktop app)
+- **4 modules:** `:shared` (KMP library), `:androidApp` (Android app), `:desktopApp` (JVM desktop app), `:nativeformat` (standalone Android library, CMake/NDK build for JNI native formatting — see below)
 - Shared code in `shared/src/`. Source sets: `commonMain`, `commonTest`, `androidMain`, `androidHostTest`, `iosMain`, `iosTest`, `jvmMain`, `jvmTest`
+- `native/` (repo root): single source of truth C code for printf-style formatting (`native_format.h`, `native_format_jni.c`), reached via JNI from Android/desktop and cinterop from iOS — see `NATIVE_FORMATTING_JUSTIFICATION.md`
 - iOS app entry: `iosApp/iosApp.xcodeproj` (open in Xcode, never build via Gradle)
 - Gradle **9.6.1** (wrapper present). Use `./gradlew` — never system `gradle`
 - Root project name: `iperf3KMP` (`settings.gradle.kts`)
@@ -16,7 +17,7 @@
 - Desktop tests: `./gradlew :shared:jvmTest`
 - Build debug APK: `./gradlew :androidApp:assembleDebug`
 - Install debug APK: `./gradlew :androidApp:installDebug`
-- Android host tests: `./gradlew :shared:testAndroidHostTest`
+- Android host tests: `./gradlew :shared:testAndroidHostTest` (excludes `StringFormatterTest` — real JNI can't load on a Robolectric host; see `NATIVE_FORMATTING_JUSTIFICATION.md`)
 - iOS: open `iosApp/iosApp.xcodeproj` in Xcode and run from there
 - iOS simulator tests: `./gradlew :shared:iosSimulatorArm64Test`
 - Test sources: `shared/src/commonTest/`, `shared/src/androidHostTest/`, `shared/src/jvmTest/`, `shared/src/iosTest/`

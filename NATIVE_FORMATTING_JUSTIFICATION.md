@@ -9,106 +9,66 @@ The `Iperf3OutputMonitor` class parses raw iperf3 output lines that use fixed-wi
 
 Kotlin's common library does not provide `String.format()` or equivalent printf-style formatting — these APIs are JVM/Android-specific and unavailable on iOS/native targets.
 
-## Why Not Reimplement in Pure Kotlin?
+## Design: One C Function, Reached Natively From Every Target
 
-A pure-Kotlin implementation would require:
-1. Parsing format specifiers from strings at runtime
-2. Implementing width padding, truncation, zero-padding flags, and decimal rounding manually
-3. Handling edge cases (negative numbers with zero-padding, overflow, locale differences)
+Rather than reimplementing printf in Kotlin, or letting each platform format independently through its own library (`java.lang.String.format`, `NSString.stringWithFormat:`), there is exactly one implementation of the formatting logic: `format_string()` in [`native/native_format.h`](native/native_format.h). Every platform calls into *that same function* through its native interop mechanism:
 
-This is a reinvention of `printf`, which has been battle-tested for 50+ years across Unix systems. The effort to implement correctly in Kotlin outweighs any benefit — it introduces bugs, maintenance burden, and deviates from the project's core research goals.
+```
+                    native/native_format.h
+                    format_string() — static inline, single source of truth
+                    /            |             \
+              JNI (Android)   JNI (desktop)   cinterop (iOS)
+                    |               |               |
+         :nativeformat module   shared/build    native_format.def
+         CMake + NDK build      .gradle.kts     (headers only, no link step)
+                    |          compileNativeFormatJvm
+              androidMain          |               |
+            NativeFormatterBridge.kt          jvmMain              iosMain
+                                NativeFormatterBridge.kt      StringFormatter.kt
+```
 
-## Why Native C Is the Right Choice
+- **Android** — `:nativeformat` is a standalone `com.android.library` Gradle module with an `externalNativeBuild`/CMake step that compiles `native/native_format_jni.c` into `libnativeformat.so` for `arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86`. `shared`'s `androidMain` depends on it and calls `NativeFormatterBridge.nativeFormat()`. This module exists because AGP 9's Kotlin Multiplatform Android plugin (`com.android.kotlin.multiplatform.library`) does not support `externalNativeBuild`/JNI compilation directly — a known AGP 9 limitation whose documented workaround is a separate classic `com.android.library` module.
+- **Desktop (JVM)** — the `compileNativeFormatJvm` Gradle task (`shared/build.gradle.kts`) compiles the same `native_format_jni.c` against the host JDK's `jni.h`, for the host OS/arch, into a resource bundled with the jar. `jvmMain`'s `NativeFormatterBridge` extracts it to a temp file at startup and `System.load()`s it.
+- **iOS** — `native_format.def` hands `native_format.h` directly to Kotlin/Native's cinterop. `format_string()` is declared `static inline` and fully defined in the header, so cinterop compiles it in place — there's no separate library to build or link, unlike the Android/desktop JNI paths.
 
-### 1. The Project Already Uses Native C for iperf3
-The application's primary purpose is running iperf3 network tests. This requires:
-- Calling the iperf3 C library via FFI/cinterop
-- Parsing iperf3's stdout output (which itself uses printf-style formatting)
-- Managing native process lifecycle
+### Why a tagged-argument array instead of C varargs
 
-Adding a small C utility for string formatting introduces no new dependencies or architectural complexity — it fits within the existing native interop pattern.
-
-### 2. `vsnprintf` Is the Canonical Solution
-The C standard library provides `vsnprintf()`, which:
-- Handles all format specifiers (`%s`, `%d`, `%f`, width, precision, alignment)
-- Is available on every target (JVM via JNI, iOS via native toolchain, Android NDK)
-- Produces deterministic, locale-independent output when used with the "C" locale
-
-### 3. Minimal Scope, Maximum Reliability
-The C wrapper is a single function:
+A C variadic function (`vsnprintf(fmt, ...)`) can't be called generically across a JNI or cinterop boundary — the caller and callee have to agree on argument types and count at compile time, which is exactly what a generic `vararg args: Any` from Kotlin breaks. So `format_string()` takes an explicit array of tagged `FormatArg` values (one per conversion specifier) instead of `...`:
 
 ```c
-int format_string(char* out, int outSize, const char* fmt, ...);
+int format_string(char* out, int out_size, const char* fmt,
+                   const FormatArg* args, int arg_count);
 ```
 
-This delegates formatting to well-tested system code rather than introducing custom Kotlin logic. The wrapper handles buffer overflow protection via `vsnprintf`'s size limit.
+Internally it only tokenizes `fmt` into literal runs and single conversion specifiers, matching each specifier to the next `FormatArg` by position. For each specifier it rebuilds a minimal one-conversion format string and calls the platform's own `snprintf()` on exactly one correctly-typed argument — so width, precision, flags, rounding, and zero-padding all come from the real libc printf implementation. The wrapper code only does tokenizing and argument dispatch, not numeric formatting.
 
-## Implementation Architecture
+Each platform's JNI/cinterop layer is responsible only for building that `FormatArg` array from platform-native values (boxed `Object[]` via JNI reflection on Android/desktop, a `CArrayPointer<FormatArg>` via cinterop on iOS) — none of them contain formatting logic of their own.
 
-### Final Design (Updated)
-
-The implementation uses platform-native APIs on each target — no cinterop required:
-
-```
-commonMain (Kotlin)
-  └── expect fun formatString(format: String, vararg args: Any): String
-
-jvmMain / androidMain (Kotlin)
-  └── actual fun formatString() — uses java.lang.String.format(Locale.US)
-
-iosMain (Kotlin + Apple Foundation)
-  └── actual fun formatString() — uses NSString.stringWithFormat()
-```
-
-This approach:
-- **iOS**: Uses `NSString.stringWithFormat()` which internally calls the same vsnprintf-based code path as C, accessed through Apple's Foundation framework (always available on iOS)
-- **JVM/Android**: Uses `java.lang.String.format(Locale.US)` for consistent decimal separators across platforms
-
-### Files Created
+## Files
 
 | File | Purpose |
 |------|---------|
-| `commonMain/.../utils/StringFormatter.kt` | `expect` declarations with full documentation |
-| `jvmMain/.../utils/StringFormatter.kt` | JVM implementation via `String.format(Locale.US)` |
-| `androidMain/.../utils/StringFormatter.kt` | Android implementation (identical to JVM) |
-| `iosMain/.../utils/StringFormatter.kt` | iOS implementation via `NSString.stringWithFormat()` |
-| `commonTest/.../utils/StringFormatterTest.kt` | 34 comprehensive tests covering all format specifiers, edge cases, and iperf3-specific patterns |
+| `native/native_format.h` | The single source of truth: tokenizer + per-specifier `snprintf` dispatch, `static inline`. |
+| `native/native_format_jni.c` | JNI wrapper shared verbatim by Android and desktop; binds via `RegisterNatives()` in `JNI_OnLoad`. |
+| `nativeformat/` | Standalone Android library module owning the CMake/NDK build for `libnativeformat.so`. |
+| `shared/src/androidMain/.../utils/NativeFormatterBridge.kt` | Android `System.loadLibrary` + `external fun` declaration. |
+| `shared/src/androidMain/.../utils/StringFormatter.kt` | Android `actual fun formatString()`. |
+| `shared/src/jvmMain/.../utils/NativeFormatterBridge.kt` | Desktop: extracts the bundled native lib to a temp file and `System.load()`s it. |
+| `shared/src/jvmMain/.../utils/StringFormatter.kt` | Desktop `actual fun formatString()`. |
+| `shared/src/nativeInterop/cinterop/native_format.def` | cinterop definition pointing directly at `native_format.h`. |
+| `shared/src/iosMain/.../utils/StringFormatter.kt` | iOS `actual fun formatString()`, builds the `FormatArg` array via cinterop. |
+| `shared/build.gradle.kts` | Wires the `nativeFormat` cinterop into both iOS targets and the `compileNativeFormatJvm` task into the desktop JVM build. |
+| `commonTest/.../utils/StringFormatterTest.kt` | Shared test suite exercising the format string contract, run against the real native path on both `jvmTest` and `iosSimulatorArm64Test`. |
 
-### Supported Format Specifiers
+### Supported format specifiers
 
-All standard C printf specifiers are supported:
-- `%s` — String (with width, left/right alignment)
-- `%d`, `%i` — Integer with width, zero-padding, precision (`%05d`)
-- `%f` — Floating-point with precision (`%.2f`, `%8.3f`)
-- `%e`, `%g`, `%x`, `%o` — Scientific/decimal/hex/octal
+`%s`, `%d`/`%i`/`%u`, `%x`/`%X`/`%o`, `%c`, `%f`/`%F`/`%e`/`%E`/`%g`/`%G`, and `%%`. Flags `-`, `0`, `+`, space, `#`; width and precision; length modifiers (`l`, `ll`, `h`, etc.) are accepted but ignored, since `format_string()` always promotes integers to `int64_t` and floats to `double` before dispatch. Dynamic width/precision (`%*d`) is not supported.
 
-Format flags: `-` (left-align), `0` (zero-pad), `+` (always show sign), `(space)` (space for positive)
+## Known limitation: androidHostTest
 
-### Key Design Decisions
+`StringFormatterTest` calls the real native library through JNI. `androidHostTest` runs on a plain Robolectric JVM host with no Android runtime and no packaged `.so` to load — `System.loadLibrary()` simply cannot succeed there, independent of correctness. `shared/build.gradle.kts` excludes `StringFormatterTest` from that task for this reason. Real end-to-end coverage of the native path comes from:
+- `./gradlew :shared:jvmTest` — real JNI, compiled and loaded on the host JVM.
+- `./gradlew :shared:iosSimulatorArm64Test` — real cinterop, compiled and linked into the simulator test binary.
+- `./gradlew :androidApp:assembleDebug` — verifies `libnativeformat.so` for all four ABIs is present in the built APK (`lib/<abi>/libnativeformat.so`).
 
-1. **No cinterop needed** — iOS uses `NSString.stringWithFormat()` which provides identical printf-style formatting via Apple's Foundation framework
-2. **US Locale on JVM/Android** — ensures consistent decimal separator (dot) across all platforms
-3. **4096 character output limit** — prevents excessive memory usage for very long format strings
-4. **Single function signature** — avoids vararg overload ambiguity issues
-
-### Test Coverage
-
-The test suite (`StringFormatterTest.kt`) covers:
-- String padding and alignment (right/left, truncation)
-- Integer formatting with width, zero-padding, negative values
-- Floating-point formatting with precision, large values
-- Mixed format specifiers matching iperf3 output patterns
-- iperf3-specific formats: connection info lines, interval data, summary statistics
-- Edge cases: empty strings, very long output, buffer limits
-- Error handling: invalid format strings, missing arguments
-
-All 34 tests pass on JVM. iOS and Android compile successfully.
-
-## Impact on Research Goals
-
-This change has no impact on the research objectives. It is purely an infrastructure improvement that:
-- Reduces code complexity in the common parsing logic
-- Eliminates a source of potential formatting bugs
-- Aligns with the project's existing use of native C for iperf3 integration
-
-The alternative — implementing printf-style formatting in Kotlin — would add ~200 lines of custom string manipulation code that duplicates functionality already available in the standard libraries of every target platform.
+Android's JNI path itself is only exercisable on a real device/emulator (`connectedAndroidTest`), which is outside what this environment can run.
