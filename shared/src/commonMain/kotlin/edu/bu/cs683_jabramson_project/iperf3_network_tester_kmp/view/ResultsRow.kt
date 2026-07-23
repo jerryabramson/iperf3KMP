@@ -26,32 +26,36 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getSource
  * @param uiState the current state of the UI
  * @param monoStyle the style for the monospaced text
  */
-@Preview(name = "Results Row Preview", showBackground = true,
+@Preview(name = "Results Row Preview", showBackground = true, showSystemUi = true,
     device = "spec:width=411dp,height=891dp"
 )
 @Composable
 fun ResultsRow(
+    results: MutableList<String> = getSampleUiState().results,
+    src: String = getSampleUiState().iperf3RunningState.localHostDetails,
+    dest: String = getSampleUiState().iperf3RunningState.remoteHostDetails,
+    isRunning: Boolean = getSampleUiState().isRunning,
+    isFinished: Boolean = getSampleUiState().isFinished,
     uiState: edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData = getSampleUiState(),
-    monoStyle: TextStyle = mesloMonoTextStyle()
+    monoStyle: TextStyle = mesloMonoTextStyle(),
+    preview: Boolean = true
 ) {
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.padding(start = 10.dp, end =  10.dp).fillMaxWidth()
     ) {
-        if (uiState.isRunning || !uiState.isFinished) return
-        if (uiState.results.isEmpty()) return
+        if (isRunning || !isFinished) return
+        if (results.isEmpty()) return
         val thick  = if (uiState.returnCode != 0) 5.dp else 2.dp
         val resultColor = if (uiState.returnCode != 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
 
-        if (!uiState.results.isEmpty()) {
+        if (results.isNotEmpty()) {
             Spacer(modifier = Modifier.height(4.dp))
             HorizontalDivider(
                 modifier = Modifier.fillMaxWidth(),
                 thickness = thick,
                 color = MaterialTheme.colorScheme.tertiary
             )
-            val src = getSource(uiState.iperf3RunningState)
-            val dest = getDest(uiState.iperf3RunningState)
             Text(
                 text = src,
                 style = monoStyle.copy(fontSize = 15.sp),
@@ -75,7 +79,7 @@ fun ResultsRow(
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(uiState.results.size) { index ->
                     Text(
-                        text = uiState.results[index],
+                        text = results[index],
                         style = monoStyle.copy(fontSize = 16.sp),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Left,

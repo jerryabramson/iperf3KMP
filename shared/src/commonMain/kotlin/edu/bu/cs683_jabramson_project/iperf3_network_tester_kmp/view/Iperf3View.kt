@@ -14,10 +14,15 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults.textFieldColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+
+
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_TYPE_NORMAL
 import androidx.compose.ui.tooling.preview.Devices
@@ -25,10 +30,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.ui.theme.Iperf3NetworkTesterTheme
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getDest
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getSource
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3RunViewModel
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
-
+import org.jetbrains.compose.resources.painterResource
 
 
 /**
@@ -41,23 +48,17 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInpu
  * using Hilt and the current ViewModelStoreOwner. Throws an error if no
  * ViewModelStoreOwner is provided.
  */
-//fun RunIperf3Screen(viewModel: Iperf3RunViewModel)
-//    checkNotNull(
-//        LocalViewModelStoreOwner.current
-//    )
-//{
-//        "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
-//    }, null
-//) {
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= hiltViewModel(
+fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())
 {
     val uiExecutionState by viewModel.uiExecutionDataStateFlow.collectAsState()
     val uiInputState by viewModel.uiInputDataStateFlow.collectAsState()
     val monoStyle = mesloMonoTextStyle()
     val fieldColors = textFieldColors()
+    val isWide = isWideWindow()
+    val isCompact = isCompactHeight()
+
     Iperf3NetworkTesterTheme(dynamicColor = true) {
         Scaffold(
             topBar = {
@@ -68,9 +69,12 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= 
                     currentFinished = uiExecutionState.isFinished,
                     currentSaved = uiExecutionState.isSaved,
                     currentIsSaving = uiExecutionState.isSaving,
+                    isCompact = isCompact,
                 )
             },
-            bottomBar = { IperfBottomBar(uiInputState, viewModel::toggleDebug) }
+            bottomBar = {
+                IperfBottomBar(uiInputState, isCompact, viewModel::toggleDebug)
+            }
         ) { padding ->
 
             Column(
@@ -94,30 +98,77 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())   //= 
                     setParallelStreams = viewModel::setParallelStreams,
                     setSkip = viewModel::setSkip,
                     colors = fieldColors,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    isWide = isWide,
+                    isCompact = isCompact,
+
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
                 /* Output rows */
                 RunningColumnSection(
-                    uiState = uiExecutionState,
+                    progress = uiExecutionState.progress,
+                    isRunning = uiExecutionState.isRunning,
+                    latestLine = uiExecutionState.latestLine,
+                    bandWidth = uiExecutionState.bandWidth,
                     isReverse =  uiInputState.isReverse,
                     parallelStreams = uiInputState.parallelStreams,
                     durationSecs = uiInputState.durationSecs,
+                    isOmitted = uiExecutionState.iperf3RunningState.omitted,
+                    interval = uiExecutionState.iperf3RunningState.intervalNumber,
+                    max = uiExecutionState.iperf3RunningState.currentMax,
+                    min = uiExecutionState.iperf3RunningState.currentMin,
+                    avg = uiExecutionState.iperf3RunningState.currentAvg,
                 )
-                ResultsRow(uiState = uiExecutionState, monoStyle)
+                ResultsRow(uiState = uiExecutionState,
+                    results = uiExecutionState.results,
+                    isRunning = uiExecutionState.isRunning,
+                    isFinished = uiExecutionState.isFinished,
+                    monoStyle = monoStyle,
+                    src = getSource(uiExecutionState.iperf3RunningState),
+                    dest = getDest(uiExecutionState.iperf3RunningState))
                 IperfMessagesSection(uiState = uiExecutionState, isDebugMode = uiInputState.isDebugging)
                 ErrorSection(uiState = uiExecutionState, monoStyle)
                 DebugOutputSection(
-                    uiInputState = uiInputState,
-                    uiExecutionData = uiExecutionState
+                    isDebugging = uiInputState.isDebugging,
+                    isOmitted = uiExecutionState.iperf3RunningState.omitted,
+                    outputLines =  uiExecutionState.outputLines,
+                    monoStyle = monoStyle,
+                    preview = false
                 )
             }
         }
     }
 }
 
+@Composable
+fun isWideWindow(): Boolean {
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
 
+    val widthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+
+    return widthDp >= 840.dp
+}
+
+/**
+ * True when there isn't much vertical room to work with -- e.g. a phone turned
+ * landscape, where a full-height top/bottom app bar can crowd out everything else.
+ * Mirrors Material's own compact-height window size class breakpoint (480dp).
+ */
+@Composable
+fun isCompactHeight(): Boolean {
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+
+    val heightDp = with(density) {
+        windowInfo.containerSize.height.toDp()
+    }
+
+    return heightDp < 480.dp
+}
 
 /**
  * Custom Compose preview annotation that automatically generates previews for both light and dark themes.
@@ -135,7 +186,7 @@ annotation class PreviewLightDarkWithBackground
 @Composable
 fun ScreenTestRunning() {
     val sampleUiState: UiExecutionData = getSampleUiState(true)
-    ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData())
+    ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData(), isWide = false)
 }
 
 /**
@@ -162,8 +213,17 @@ fun ScreenTestRunning() {
 @Composable
 fun ScreenTestFinished() {
     val sampleUiState: UiExecutionData = getSampleUiState(false)
-    ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData())
+    ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData(), isWide = false)
 }
+
+@Preview(name = "Wide", showBackground = true, uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL, device =  Devices.TABLET, showSystemUi = true)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScreenTestWide() {
+    val sampleUiState: UiExecutionData = getSampleUiState(false)
+    ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData(), isWide = true)
+}
+
 
 /**
  * Composable function that initializes and displays the main screen layout for the Iperf3 Network Tester.
@@ -175,7 +235,8 @@ fun ScreenTestFinished() {
  */
 @Composable
 fun ScreenTestScaffold(uiState: UiExecutionData,
-                       inputData: UiInputData)
+                       inputData: UiInputData,
+                       isWide: Boolean = false)
 {
     Iperf3NetworkTesterTheme(dynamicColor = true) {
         Surface(
@@ -190,10 +251,11 @@ fun ScreenTestScaffold(uiState: UiExecutionData,
                 bottomBar = { IperfBottomBar(getSampleInputData()) {} },
 
                 ) { padding ->
-                ScreenBody(
+                ScreenBodyPreview(
                     padding = padding,
                     uiInputState = inputData,
-                    uiExecutionState = uiState
+                    uiExecutionState = uiState,
+                    isWide = isWide,
                 )
 
             }
@@ -221,16 +283,17 @@ fun ScreenTestScaffold(uiState: UiExecutionData,
  */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ScreenBody(padding: PaddingValues,
-               uiExecutionState: UiExecutionData = getSampleUiState(false),
-               uiInputState: UiInputData,
-               updateHostName: (String) -> Unit = {},
-               uploadDownload: (String) -> Unit = {},
-               launch: () -> Unit = {},
-               setDuration: (String) -> Unit = {},
-               setPortNumber: (String) -> Unit = {},
-               setParallelStreams: (String) -> Unit = {},
-               setSkip: (String) -> Unit = {},
+fun ScreenBodyPreview(padding: PaddingValues,
+                      uiExecutionState: UiExecutionData = getSampleUiState(false),
+                      uiInputState: UiInputData = getSampleInputData(),
+                      updateHostName: (String) -> Unit = {},
+                      uploadDownload: (String) -> Unit = {},
+                      launch: () -> Unit = {},
+                      setDuration: (String) -> Unit = {},
+                      setPortNumber: (String) -> Unit = {},
+                      setParallelStreams: (String) -> Unit = {},
+                      setSkip: (String) -> Unit = {},
+                      isWide: Boolean = false
 )
 {
     val monoStyle = mesloMonoTextStyle()
@@ -254,24 +317,30 @@ fun ScreenBody(padding: PaddingValues,
             setParallelStreams = setParallelStreams,
             setSkip = setSkip,
             colors = fieldColors,
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodySmall,
+            isWide = isWide,
         )
         Spacer(modifier = Modifier.height(10.dp))
 
         /* Output rows */
-        /* Output rows */
         RunningColumnSection(
-            uiState = uiExecutionState,
-            isReverse = uiInputState.isReverse,
+            progress = uiExecutionState.progress,
+            isRunning = uiExecutionState.isRunning,
+            latestLine = uiExecutionState.latestLine,
+            bandWidth = uiExecutionState.bandWidth,
+            isReverse =  uiInputState.isReverse,
             parallelStreams = uiInputState.parallelStreams,
-            durationSecs = uiInputState.durationSecs
+            durationSecs = uiInputState.durationSecs,
+            preview = true
         )
-        ResultsRow(uiState = uiExecutionState, monoStyle)
+
+        ResultsRow(uiState = uiExecutionState, monoStyle = monoStyle, preview = true)
         IperfMessagesSection(uiState = uiExecutionState, isDebugMode = true)
         ErrorSection(uiState = uiExecutionState, monoStyle)
         DebugOutputSection(
-            uiInputState = uiInputState,
-            uiExecutionData = uiExecutionState
+            isDebugging = uiInputState.isDebugging,
+            outputLines =  uiExecutionState.outputLines,
+            isOmitted = uiExecutionState.iperf3RunningState.omitted,
         )
     }
 }

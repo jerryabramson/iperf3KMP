@@ -1,91 +1,173 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItemDefaults.verticalAlignment
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_6
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.getSampleOutputData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getHeading
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.getHeading
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
+import kotlinx.coroutines.NonCancellable.start
 
 
 @Preview(name = "Debug Output Section", showBackground = true,
     device = PIXEL_6, showSystemUi = true)
 @Composable
 fun DebugOutputSection(
-    uiInputState: UiInputData = getSampleInputData(),
-    uiExecutionData: UiExecutionData = getSampleUiState(),
-    monoStyle: TextStyle = mesloMonoTextStyle()
+    isDebugging: Boolean = true,
+    isOmitted: Boolean = getSampleUiState().iperf3RunningState.omitted,
+    outputLines: MutableList<String> = getSampleUiState().outputLines,
+    monoStyle: TextStyle = mesloMonoTextStyle(),
+    preview: Boolean = true,
 ) {
-    if (!uiInputState.isDebugging) return
+    if (!isDebugging) return
     val fontSize = 13.sp
     val style = monoStyle.copy(fontSize = fontSize)
-    val color = if (uiExecutionData.iperf3RunningState.omitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
-    Column(modifier = Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp)) {
-
+    val color =
+        if (isOmitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
+    if (outputLines.isEmpty()) {
+        Text(
+            text = "No Output",
+            textAlign = TextAlign.Left,
+            style = style,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
+        )
+    } else {
         HorizontalDivider(
             modifier = Modifier
-                .fillMaxWidth().padding(top = 5.dp),
+                .fillMaxWidth().padding(top = 5.dp, bottom = 5.dp),
             thickness = 2.dp,
             color = MaterialTheme.colorScheme.tertiary
         )
-        if (uiExecutionData.outputLines.isNotEmpty()) {
-            Text(
-                text = getHeading(),
-                textAlign = TextAlign.Left,
-                style = style,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
-            )
-            Box(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 2.dp)
-                    .border(width = 1.dp, color = MaterialTheme.colorScheme.tertiary)
-            )
-            {
-                //Column(modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp)) {
 
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val density = LocalDensity.current
+            val textMeasurer = rememberTextMeasurer()
 
-                LazyColumn(modifier = Modifier.padding(bottom = 2.dp)) {
-                    items(uiExecutionData.outputLines.size) { index ->
-                        val str =
-                            uiExecutionData.outputLines[uiExecutionData.outputLines.size - index - 1]
-                        DebugOutputItem(
-                            uiExecutionData.outputLines[uiExecutionData.outputLines.size - index - 1],
-                            style = style,
-                            color = color,
-                            stalled = str.lowercase().contains("stalled"),
-                            skipped = str.lowercase().contains("skipped")
-                        )
-                    }
+            // Every row (and the heading) is printf-formatted to a fixed character
+            // width, so a single real line tells us exactly how wide a column needs
+            // to be. Fall back to the heading before any output has a first line.
+            val sampleText = outputLines.firstOrNull() ?: getHeading(preview)
+            val rowWidthPx = remember(sampleText, style) {
+                textMeasurer.measure(sampleText, style).size.width
+            }
+            // Each column's own start/end padding plus its 1dp border on both sides.
+            val columnChromeWidthPx = with(density) { (10.dp + 10.dp + 1.dp + 1.dp).toPx() }
+            val columnWidthPx = rowWidthPx + columnChromeWidthPx
+            val availableWidthPx = with(density) { maxWidth.toPx() }
+            val columnCount = (availableWidthPx / columnWidthPx).toInt().coerceAtLeast(1)
+
+            // Approximate row height from the item font size, with margin so we
+            // never overestimate how many rows fit (that would force the "pinned"
+            // columns to scroll, defeating the point of them).
+            val rowHeightPx = with(density) { style.fontSize.toPx() * 1.7f }
+            // Heading row's own top/bottom padding (4dp + 4dp) plus its 1dp divider.
+            val headingReservePx = rowHeightPx + with(density) { 9.dp.toPx() }
+            val availableRowsPx = with(density) { maxHeight.toPx() } - headingReservePx
+            val visibleRowsPerColumn = (availableRowsPx / rowHeightPx).toInt().coerceAtLeast(1)
+
+            // Every column but the last is pinned to a fixed slice of the most recent
+            // remaining lines and never scrolls. The last column keeps everything
+            // left over and scrolls on its own -- so the split points don't reshuffle
+            // on every new line the way an even split of the whole history would.
+            val columns = splitIntoColumns(outputLines, columnCount, visibleRowsPerColumn)
+
+            Row {
+                columns.forEach { columnLines ->
+                    OutputBox(
+                        modifier = Modifier.weight(1f)
+                            .padding(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 2.dp),
+                        outputLines = columnLines,
+                        style = style,
+                        color = color,
+                        preview = preview
+                    )
                 }
             }
-        } else {
-            Text(
-                text = "No Output",
-                textAlign = TextAlign.Left,
-                style = style,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
-            )
+        }
+    }
+}
 
+/**
+ * Splits [outputLines] (oldest first) into [columnCount] left-to-right buckets for
+ * newest-to-oldest display: every column but the last holds up to [rowsPerColumn] of
+ * the most recent remaining lines; the last column keeps everything left over.
+ */
+private fun splitIntoColumns(
+    outputLines: List<String>,
+    columnCount: Int,
+    rowsPerColumn: Int
+): List<MutableList<String>> {
+    if (columnCount <= 1) return listOf(outputLines.toMutableList())
+    val columns = mutableListOf<MutableList<String>>()
+    var remainingEnd = outputLines.size
+    repeat(columnCount - 1) {
+        val take = minOf(rowsPerColumn, remainingEnd)
+        val fromIndex = remainingEnd - take
+        columns.add(outputLines.subList(fromIndex, remainingEnd).toMutableList())
+        remainingEnd = fromIndex
+    }
+    columns.add(outputLines.subList(0, remainingEnd).toMutableList())
+    return columns
+}
+
+@Composable
+fun OutputBox(modifier: Modifier = Modifier,
+              style: TextStyle,
+              color: Color,
+              outputLines: MutableList<String>,
+              preview: Boolean = true) {
+    Column(
+        modifier = modifier.border(width = 1.dp, color = MaterialTheme.colorScheme.tertiary)
+    ) {
+        Text(
+            text = getHeading(preview),
+            textAlign = TextAlign.Left,
+            style = style,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxWidth().padding(start = 10.dp, top = 4.dp, bottom = 4.dp)
+        )
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.tertiary)
+        LazyColumn(modifier = Modifier.padding(bottom = 2.dp)) {
+            items(outputLines.size) { index ->
+                val reverseIndex = outputLines.size - index - 1
+                val str =
+                    outputLines[reverseIndex]
+                DebugOutputItem(
+                    outputLines[reverseIndex],
+                    style = style,
+                    color = color,
+                    stalled = str.lowercase().contains("stalled"),
+                    skipped = str.lowercase().contains("skipped")
+                )
+            }
         }
     }
 }
@@ -97,7 +179,7 @@ fun DebugOutputItem(text: String,
                     stalled: Boolean = false,
                     skipped: Boolean = false)
 {
-    Row {
+    //Row {
         Text(
             text = text,
             textAlign = TextAlign.Left,
@@ -106,6 +188,6 @@ fun DebugOutputItem(text: String,
             color = if (!stalled && !skipped) color else MaterialTheme.colorScheme.error
 
         )
-    }
+    //}
 
 }

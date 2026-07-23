@@ -1,6 +1,9 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -12,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
@@ -20,29 +24,72 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInpu
 @Composable
 fun DebugOnOffToggle(
     currentDebugging: Boolean = getSampleInputData().isDebugging,
-    toggleDebug: () -> Unit = {}
+    toggleDebug: () -> Unit = {},
+    isCompact: Boolean = false
 ) {
     val buttonColor = if (!currentDebugging) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
-    Column(horizontalAlignment = Alignment.End) {
-        Text(text = "iperf3 Output",
-            modifier = Modifier.padding(end = 10.dp),
-            style = MaterialTheme.typography.bodySmall)
-        Button(
-            onClick =  toggleDebug, // 1. Flip state on click
-            colors = ButtonDefaults.buttonColors(
-                containerColor = buttonColor
-            ),
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.padding(1.dp)//.width(240.dp).height(50.dp)
-        ) {
-            if (currentDebugging) {
-                Text(text = "Turn Off",
-                    color = MaterialTheme.colorScheme.surface,
-                    style = MaterialTheme.typography.labelSmall)
-            } else {
-                Text(text = "Turn On",
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    style = MaterialTheme.typography.labelSmall)
+    if (!isCompact) {
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = "iperf3 Output",
+                modifier = Modifier.padding(end = 10.dp),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Button(
+                onClick = toggleDebug, // 1. Flip state on click
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = buttonColor
+                ),
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.padding(1.dp)//.width(240.dp).height(50.dp)
+            ) {
+                if (currentDebugging) {
+                    Text(
+                        text = "Turn Off",
+                        color = MaterialTheme.colorScheme.surface,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                } else {
+                    Text(
+                        text = "Turn On",
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        }
+    } else {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "iperf3 Output",
+                modifier = Modifier.padding(end = 10.dp),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Button(
+                onClick = toggleDebug, // 1. Flip state on click
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = buttonColor
+                ),
+                shape = MaterialTheme.shapes.small,
+                // Button's default min-height (40dp) doesn't shrink to fit a tight
+                // parent -- it just gets clipped, text and all. Override both the
+                // padding and the height explicitly so the text has room to render.
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                modifier = Modifier.height(28.dp)
+            ) {
+                if (currentDebugging) {
+                    Text(
+                        text = "Turn Off",
+                        color = MaterialTheme.colorScheme.surface,
+                        style = mesloMonoTextStyle().copy(fontSize = 9.sp),
+                    )
+                } else {
+                    Text(
+                        text = "Turn On",
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        style = mesloMonoTextStyle().copy(fontSize = 9.sp),
+                    )
+                }
             }
         }
     }

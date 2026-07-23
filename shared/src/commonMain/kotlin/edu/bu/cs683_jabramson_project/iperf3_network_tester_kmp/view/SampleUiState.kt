@@ -1,6 +1,7 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.Iperf3RunningState
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.runner.getSampleOutputData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.UnitConvertedData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.fromHumanUnit
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.DefaultInputData

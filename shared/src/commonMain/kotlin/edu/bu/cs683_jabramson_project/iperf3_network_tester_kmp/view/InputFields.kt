@@ -14,13 +14,18 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults.textFieldColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+
+
+
 import androidx.compose.runtime.Composable
 //import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.window.core.layout.WindowSizeClass
 
 
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
@@ -36,12 +41,11 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3
  *   2. Numeric field for the duration
  *   3. Settings section - upload/download
 
- * @param uiState the current state of the UI
- * @param colors the colors for the text fields
+  * @param colors the colors for the text fields
  * @param style the style for the monospaced text
  */
 @OptIn(ExperimentalMaterial3Api::class)
-//@Preview(name = "Host Input Row", showBackground = true, device = "spec:width=411dp,height=891dp", showSystemUi = true)
+@Preview(name = "Host Input Row", showBackground = true, device = "spec:width=411dp,height=891dp", showSystemUi = true)
 @Composable
 fun InputFields(
     currentHostName: String = getSampleInputData().hostName,
@@ -59,24 +63,13 @@ fun InputFields(
     setParallelStreams: (String) -> Unit = {},
     setSkip: (String) -> Unit = {},
     colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
-    style: TextStyle = MaterialTheme.typography.bodySmall)
-{
-/*
-    val placeHolder = if (currentValue == -1) defaultValue.toString() else currentValue.toString()
-    val valString = if (currentValue == -1) "" else currentValue.toString()
- */
-
-//    val valString: String
-//    val placeHolder: String
-//    if (inputState.hostName.trim().isEmpty() || inputState.hostName.trim() == DefaultInputData.HOST_NAME.trim()) {
-//        valString = DefaultInputData.HOST_NAME.trim()
-//        placeHolder = "iperf3 Server"
-//    } else {
-//        valString = inputState.hostName.trim()
-//        placeHolder = ""
-//    }
+    style: TextStyle = MaterialTheme.typography.bodySmall,
+    isWide: Boolean = false,
+    isCompact: Boolean = false) {
     val valString: String
     val placeHolder: String
+
+
     if (currentHostName.trim().isEmpty() || currentHostName.trim() == DefaultInputData.HOST_NAME.trim()) {
         valString = ""
         placeHolder = DefaultInputData.HOST_NAME.trim()
@@ -84,88 +77,152 @@ fun InputFields(
         valString = currentHostName.trim()
         placeHolder = currentHostName.trim()
     }
-
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(start =6.dp, end =6.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
-        ) {
-            TextField(
-                value = valString,
-                onValueChange = updateHostName,
-                enabled = !isRunning,
-                placeholder = {
-                    Text(
-                        text =  placeHolder,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
-                },
-                modifier = Modifier.width(width = 180.dp)
-                    .padding(end = 8.dp),
-                label = {
-                    Text(
-                        text =  "iPerf3 Server",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                },
-                colors = colors,
-                singleLine = true,
-                //keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { launch() }),
-                //keyboardOptions = KeyboardOptions(
-                //    keyboardType = KeyboardType.Uri,
-                //    imeAction = ImeAction.Done
-                //)
-            )
-
-            GenericNumericField(
-                currentValue = currentPort,
-                onValueChange = setPortNumber,
-                enabled = !isRunning,
-                defaultValue = DefaultInputData.PORT_NUMBER,
-                label = "Port",
-                modifier = Modifier.width(width = 90.dp)
-                    .padding(end = 8.dp),
-                colors = colors
-            )
-
-            GenericNumericField(
-                currentValue = currentDuration,
-                onValueChange = setDuration,
-                enabled = !isRunning,
-                defaultValue = DefaultInputData.DURATION,
-                label = "Duration",
-                modifier = Modifier.width(width = 120.dp),
-                         //.padding(end = .dp),
-                colors = colors
-            )
-
-
-        }
-        Row(
-            modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),//.fillMaxWidth().
-        ) {
-
-            GenericNumericField(
-                currentValue = currentParallelStreams,
-                onValueChange = setParallelStreams,
-                enabled = !isRunning,
-                defaultValue = DefaultInputData.PARALLEL_STREAMS,
-                label = "Streams",
-                modifier = Modifier.padding(end = 8.dp).width(width = 120.dp),
-                //colors = colors
-            )
-            GenericNumericField(
-                currentValue = currentSkip,
-                onValueChange = setSkip,
-                enabled = !isRunning,
-                defaultValue = DefaultInputData.SKIP,
-                label = "Omitted Results",
-                modifier = Modifier.width(width = 130.dp),//.padding(end = 8.dp).
-                colors = colors,
+    // A single row of fields is cheaper on vertical space than two stacked rows,
+    // so use it whenever there's either width to spare (isWide) or height is
+    // tight (isCompact, e.g. a phone in landscape) -- not just on wide tablets.
+    if (!isWide && !isCompact) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(start = 6.dp, end = 6.dp)
+        )
+        {
+            Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
+                HostField(
+                    valString = valString, placeHolder = placeHolder,
+                    isRunning = isRunning, colors = colors,
+                    updateHostName = updateHostName
                 )
-            UploadDownload(currentReverse, isRunning = isRunning, setUploadDownload = uploadDownload)
+                PortField(currentPort = currentPort, isRunning = isRunning, colors = colors, setPortNumber = setPortNumber)
+                DurationField(isRunning = isRunning, colors = colors, setDuration = setDuration)
+            }
+            Row(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+                StreamsAndSkip(
+                    currentParallelStreams = currentParallelStreams, currentSkip = currentSkip, currentReverse = currentReverse,
+                    colors = colors,
+                    isRunning = isRunning,
+                    uploadDownload = uploadDownload, setSkip = setSkip,
+                )
+            }
+        }
+    } else {
+        val verticalPadding = if (isCompact) 2.dp else 10.dp
+        Row(
+            modifier = Modifier.padding(top = verticalPadding, bottom = verticalPadding, start =  10.dp),//.fillMaxWidth().
+        ) {
+            HostField(
+                valString = valString, placeHolder = placeHolder,
+                isRunning = isRunning, colors = colors,
+                updateHostName = updateHostName
+            )
+            PortField(currentPort = currentPort, isRunning = isRunning, colors = colors, setPortNumber = setPortNumber)
+            DurationField(currentDuration = currentDuration, setDuration = setDuration, isRunning = isRunning, colors = colors)
+            StreamsAndSkip(
+                currentParallelStreams = currentParallelStreams,
+                currentSkip = currentSkip,
+                currentReverse = currentReverse,
+                isRunning = isRunning,
+                uploadDownload = uploadDownload,
+                setSkip = setSkip,
+                colors = colors
+            )
         }
     }
 }
 
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StreamsAndSkip(currentParallelStreams: Int, currentSkip: Int, currentReverse: Boolean, isRunning: Boolean,
+                   uploadDownload: (String) -> Unit,
+                   setSkip: (String) -> Unit,
+                   colors: androidx.compose.material3.TextFieldColors = textFieldColors()) {
+    GenericNumericField(
+        currentValue = currentParallelStreams,
+        onValueChange = {},
+        enabled = true,
+        defaultValue = DefaultInputData.PARALLEL_STREAMS,
+        label = "Streams",
+        modifier = Modifier.width(width = 130.dp).padding(end = 8.dp),
+        colors = colors
+    )
+    GenericNumericField(
+        currentValue = currentSkip,
+        onValueChange = setSkip,
+        enabled = !isRunning,
+        defaultValue = DefaultInputData.SKIP,
+        label = "Omitted Results",
+        modifier = Modifier.width(width = 130.dp),
+        colors = colors
+    )
+    UploadDownload(currentReverse, isRunning = isRunning, setUploadDownload = uploadDownload)
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HostField(valString: String = "", placeHolder: String = "", colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
+              isRunning: Boolean = true,
+              updateHostName: (String) -> Unit = {})
+{
+    TextField(
+        value = valString,
+        onValueChange = updateHostName,
+        enabled = !isRunning,
+        placeholder = {
+            Text(
+                text = placeHolder,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+        },
+        modifier = Modifier.width(width = 180.dp)
+            .padding(end = 8.dp),
+        label = {
+            Text(
+                text = "iPerf3 Server",
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        colors = colors,
+        singleLine = true,
+//keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { launch() }),
+//keyboardOptions = KeyboardOptions(
+//    keyboardType = KeyboardType.Uri,
+//    imeAction = ImeAction.Done
+//)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PortField(currentPort: Int = 0, isRunning: Boolean = true, colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
+              setPortNumber: (String) -> Unit = {}, )
+{
+    GenericNumericField(
+        currentValue = currentPort,
+        onValueChange = setPortNumber,
+        enabled = !isRunning,
+        defaultValue = DefaultInputData.PORT_NUMBER,
+        label = "Port",
+        modifier = Modifier.width(width = 90.dp)
+            .padding(end = 8.dp),
+        colors = colors
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DurationField(currentDuration: Int = 0, isRunning: Boolean = true, colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
+                  setDuration: (String) -> Unit = {}, ) {
+    GenericNumericField(
+        currentValue = currentDuration,
+        onValueChange = setDuration,
+        enabled = !isRunning,
+        defaultValue = DefaultInputData.DURATION,
+        label = "Duration",
+        modifier = Modifier.width(width = 120.dp).padding(end = 8.dp),
+        //.padding(end = .dp),
+        colors = colors
+    )
+
+}

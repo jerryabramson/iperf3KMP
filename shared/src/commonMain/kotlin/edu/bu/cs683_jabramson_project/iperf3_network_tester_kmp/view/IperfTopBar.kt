@@ -1,6 +1,7 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 //import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.R
@@ -28,8 +30,13 @@ fun IperfTopBar(
     currentSaved: Boolean = false,
     buttonAction: () -> Unit = {},
     saveButtonAction: () -> Unit = {},
+    isCompact: Boolean = false,
 ) {
+    // CenterAlignedTopAppBar reserves ~64dp regardless of content size, so it
+    // needs an explicit override to actually shrink when vertical space is tight.
+    val barModifier = if (isCompact) Modifier.height(48.dp) else Modifier
     CenterAlignedTopAppBar(
+        modifier = barModifier,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
@@ -41,7 +48,8 @@ fun IperfTopBar(
                 isFinished = currentFinished,
                 isSaved = currentSaved,
                 isSaving = currentIsSaving,
-                saveButtonAction = saveButtonAction)
+                saveButtonAction = saveButtonAction,
+                isCompact = isCompact)
         },
         title = {
             Row(
@@ -51,8 +59,9 @@ fun IperfTopBar(
             )
             {
                 Text(
-                    style = MaterialTheme.typography.titleMedium,
+                    style = if (isCompact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.titleMedium,
                     text =  "iperf3 Network Tester",
+                    maxLines = 1,
                     //text = stringResource(
                     //    id = Res.string.app_name,
                     //    resource = TODO()
@@ -64,7 +73,8 @@ fun IperfTopBar(
         actions = {
             RunButton(
                 isRunning = currentRunning,
-                buttonAction = buttonAction
+                buttonAction = buttonAction,
+                isCompact = isCompact
             )
         }
 

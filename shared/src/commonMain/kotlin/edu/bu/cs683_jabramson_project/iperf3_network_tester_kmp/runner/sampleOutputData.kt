@@ -4,6 +4,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view.SampleUiSta
 
 class SampleOutputData {
     val iperf3OutputExample = listOf(
+        "{iPerf JNI} 🚀 Initiating iPerf3 client request ...",
         "Connecting to host jabramson.com, port 5201",
         "Reverse mode, remote host jabramson.com is sending",
         "[  7] local 192.168.1.10 port 50971 connected to 192.168.1.32 port 5201",
@@ -355,7 +356,8 @@ class SampleOutputData {
         "[SUM]   0.00-30.00  sec  8.22 GBytes  2.35 Gbits/sec   25             sender",
         "[SUM]   0.00-30.00  sec  8.22 GBytes  2.35 Gbits/sec                  receiver",
         "",
-        "iperf Done."
+        "iperf Done.",
+        "{iPerf JNI} 🚀 Test completed successfully."
     ).toMutableList()
 }
 

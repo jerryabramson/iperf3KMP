@@ -20,7 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.Iperf3RunningState
+import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.UnitConvertedData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.toWholeNumber
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 
@@ -32,29 +35,38 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExec
 )
 @Composable
 fun RunningColumnSection(
-    uiState: UiExecutionData = getSampleUiState(),
+    progress: Float = 0.0.toFloat(),
+    interval: Long = getSampleUiState().iperf3RunningState.intervalNumber,
+    isRunning: Boolean = getSampleUiState().isRunning,
+    latestLine: String = getSampleUiState().latestLine,
+    bandWidth: String = getSampleUiState().bandWidth,
     isReverse: Boolean = getSampleInputData().isReverse,
+    isOmitted: Boolean = getSampleUiState().iperf3RunningState.omitted,
     parallelStreams: Int = getSampleInputData().parallelStreams,
-    durationSecs: Int = getSampleInputData().durationSecs
-    ) {
-    if (!uiState.isRunning) return
+    durationSecs: Int = getSampleInputData().durationSecs,
+    max: UnitConvertedData= getSampleUiState().iperf3RunningState.currentMax,
+    min: UnitConvertedData = getSampleUiState().iperf3RunningState.currentMin,
+    avg: UnitConvertedData = getSampleUiState().iperf3RunningState.currentAvg,
+    preview: Boolean = true)
+{
+    if (!isRunning) return
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
-        LaunchingMessage(uiState.latestLine.isEmpty())
+        LaunchingMessage(latestLine.isEmpty())
         val (barColor, trackColor) = progressColors(isReverse)
 
-        if (uiState.bandWidth.isNotEmpty()) {
+        if (bandWidth.isNotEmpty()) {
             //ProgressPercent(uiInputData, uiState)
 
-            ProgressPercent(isReverse = isReverse, parallelStreams = parallelStreams, durationSecs = durationSecs, uiState)
+            ProgressPercent(isOmitted = isOmitted, isReverse = isReverse, parallelStreams = parallelStreams, durationSecs = durationSecs, progress = progress, intervalNumber = interval)
             LinearProgressIndicator(
-                progress = { uiState.progress },
+                progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(10.dp),
                 color = barColor,
                 trackColor = trackColor,
                 strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
             )
-            BandwidthDisplay(uiState)
+            BandwidthDisplay(min = min, max = max, avg = avg, preview = preview, basicBandWidthString = bandWidth)
         }
     }
 }
@@ -88,38 +100,54 @@ fun progressColors(isReverse: Boolean): Pair<androidx.compose.ui.graphics.Color,
 
 
 @Composable
-fun ProgressPercent(isReverse: Boolean = getSampleInputData().isReverse,
+fun ProgressPercent(isOmitted: Boolean = getSampleUiState().iperf3RunningState.omitted,
+                    isReverse: Boolean = getSampleInputData().isReverse,
                     parallelStreams: Int = getSampleInputData().parallelStreams,
                     durationSecs: Int = getSampleInputData().durationSecs,
-                    uiExecutionState: UiExecutionData = getSampleUiState()) {
-    val num = if (isReverse) 1f - uiExecutionState.progress else uiExecutionState.progress
-    val percent = (num * 100).toInt()
+                    intervalNumber: Long = getSampleUiState().iperf3RunningState.intervalNumber,
+                    progress: Float = getSampleUiState().progress)
+{
+    if (!isOmitted) {
+        val num = if (isReverse) (1f - progress) else progress
+        val percent = (num * 100).toInt()
 
-    //@SuppressLint("DefaultLocale")
-    val iter = "iteration ${uiExecutionState.iperf3RunningState.intervalNumber} of ${durationSecs}"
+        //@SuppressLint("DefaultLocale")
+        val iter = "iteration ${intervalNumber} of ${durationSecs}"
+        Text(
+            text = "${percent}% complete : $iter [$parallelStreams streams]",
+            modifier = Modifier.fillMaxWidth(),
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center,
+        )
+    } else {
+        Text(
+            text = "Omitted Result",
+            modifier = Modifier.fillMaxWidth(),
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center,
+            color =  MaterialTheme.colorScheme.error
+        )
 
-
-    val streams = parallelStreams
-    Text(
-        text = "${percent}% complete : $iter [$streams streams]",
-        modifier = Modifier.fillMaxWidth(),
-        fontSize = 16.sp,
-        textAlign = TextAlign.Center,
-    )
+    }
 }
 
 
 
 @Composable
-fun BandwidthDisplay(uiState: UiExecutionData = getSampleUiState()) {
+fun BandwidthDisplay(omittedResult: Boolean = false,
+                     stalledResult: Boolean = false,
+                     basicBandWidthString: String = "",
+                     max: UnitConvertedData,
+                     min: UnitConvertedData,
+                     avg: UnitConvertedData,
+    iperf3RunningState: Iperf3RunningState = getSampleUiState().iperf3RunningState,
+                     preview: Boolean = false) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val omittedResult = uiState.iperf3RunningState.omitted
-        val stalledResult = uiState.iperf3RunningState.stalled
         val color = if (!omittedResult && !stalledResult) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
         Text(
-            text = uiState.iperf3RunningState.basicBandWidthString,
+            text = basicBandWidthString,
             color = color,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
@@ -133,9 +161,6 @@ fun BandwidthDisplay(uiState: UiExecutionData = getSampleUiState()) {
             thickness = 2.dp,
             color = MaterialTheme.colorScheme.primary
         )
-        val max = uiState.iperf3RunningState.currentMax
-        val min = uiState.iperf3RunningState.currentMin
-        val avg = uiState.iperf3RunningState.currentAvg
 
         //val med = uiState.lineResult.currentMedian
         Row(
@@ -173,22 +198,22 @@ fun BandwidthDisplay(uiState: UiExecutionData = getSampleUiState()) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = toWholeNumber(min).trim(),
+                text = toWholeNumber(min, preview).trim(),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium
             )
 //            Text(
-//                text = toWholeNumber(med),
+//                text = toWholeNumber(med, preview),
 //                color = MaterialTheme.colorScheme.primary,
 //                style = MaterialTheme.typography.bodyMedium
 //            )
             Text(
-                text = toWholeNumber(avg),
+                text = toWholeNumber(avg, preview),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = toWholeNumber(max),
+                text = toWholeNumber(max, preview),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium
             )

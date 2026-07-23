@@ -40,8 +40,20 @@ fun toString(unitConvertedData: UnitConvertedData): String = "${unitConvertedDat
 fun toIntString(unitConvertedData: UnitConvertedData): String = if (unitConvertedData.value >  0) "${unitConvertedData.value.toInt()})" else ZERO_STRING
 
 
-fun toWholeNumber(unitConvertedData: UnitConvertedData): String =
-    if (unitConvertedData.value >=  0) formatString("%10.2f %s", unitConvertedData.value, unitConvertedData.unit) else ZERO_VALUE_STRING
+fun toWholeNumber(unitConvertedData: UnitConvertedData, preview: Boolean = false): String {
+    var ret: String = ""
+    if (!preview) {
+        if (unitConvertedData.value >= 0) {
+            ret = formatString("%10.2f %s", unitConvertedData.value, unitConvertedData.unit)
+        } else {
+            ret = ZERO_VALUE_STRING
+        }
+    } else {
+        ret = "${unitConvertedData.value} ${unitConvertedData.unit}"
+    }
+    return ret
+}
+
 
 
 

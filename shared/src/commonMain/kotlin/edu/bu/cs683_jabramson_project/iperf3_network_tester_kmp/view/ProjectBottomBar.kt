@@ -25,6 +25,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInpu
 @Composable
 @Preview(name ="Project Bottom Bar", showBackground = true, showSystemUi = true)
 fun ProjectBottomBar(currentDebugging: Boolean = getSampleInputData().isDebugging,
+                     isCompact: Boolean = false,
                      toggleDebug: () -> Unit = {}
 ) {
     val fontSize = 10.sp
@@ -35,17 +36,23 @@ fun ProjectBottomBar(currentDebugging: Boolean = getSampleInputData().isDebuggin
         modifier = Modifier
             .padding(start = 2.dp, end =2.dp)
             .fillMaxWidth()) {
-        Column(modifier = Modifier.padding(end = 2.dp)) {
-            Text(
-                text = "Mobile Development Directed Study",
-                style = MaterialTheme.typography.labelLarge
-            )
-            Text(
-                text = "Jerold Abramson",
-                style = style,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-        }
-        DebugOnOffToggle(currentDebugging, toggleDebug)
+        // There isn't room for the course/author footer alongside the debug
+        // toggle when vertical space is tight (e.g. a phone in landscape).
+        //if (!isCompact) {
+            Column(modifier = Modifier.padding(end = 2.dp)) {
+                Text(
+                    text = if (isCompact) "Mobile Development Directed Study - Jerold Abramson" else "Mobile Development Directed Study",
+                    style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge
+                )
+                if (!isCompact) {
+                    Text(
+                        text = "Jerold Abramson",
+                        style = style,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
+        //}
+        DebugOnOffToggle(currentDebugging, toggleDebug, isCompact)
     }
 }

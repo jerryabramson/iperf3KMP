@@ -274,12 +274,18 @@ class Iperf3OutputMonitor {
     fun getCurrentLineResult() = currentIperf3RunningState
 }
 
-fun getHeading(): String =
-    formatString("%-12.12s %4.4s %-9.9s %10.10s",
-        "Interval",
-        "rate",
-        "Unit",
-        "comment")
+fun getHeading(preview: Boolean = false): String {
+    return if (!preview) {
+        formatString(
+            "%-12.12s %4.4s %-9.9s %10.10s",
+            "Interval",
+            "rate",
+            "Unit",
+            "comment")
+    } else {
+        "Interval    rate Unit       comment"
+    }
+}
 
 fun getDebugHeading(): String =
      formatString("%-12.12s %4.4s %-9.9s %7.7s %7.7s %7.7s %10.10s",

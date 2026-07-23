@@ -218,7 +218,9 @@ class Iperf3RunViewModel() : ViewModel() {
 //            lastMessages.forEach { Log.d(tag, "lastMessages: $it") }
             _uiExecutionDataStateFlow.update {
                 it.copy(
-                    iperf3Messages = iperf3RunningState.messages.toMutableList(),
+                    iperf3Messages = if (iperf3RunningState.messages.isNotEmpty())
+                        (iperf3RunningState.messages).toMutableList()
+                    else it.iperf3Messages,
                     numberOfMessages = lastMessages.size,
                     iperf3RunningState = iperf3RunningState
                 )
@@ -229,11 +231,9 @@ class Iperf3RunViewModel() : ViewModel() {
                     lastLine = it.latestLine,
                     bandWidth = iperf3RunningState.basicBandWidthString,
                     latestLine = iperf3RunningState.formattedOutputLine,
-                    outputLines = it.outputLines.also {
-                        if (iperf3RunningState.formattedOutputLine.isNotEmpty()) {
-                            it.add(iperf3RunningState.formattedOutputLine)
-                        }
-                    },
+                    outputLines = if (iperf3RunningState.formattedOutputLine.isNotEmpty())
+                        (it.outputLines + iperf3RunningState.formattedOutputLine).toMutableList()
+                    else it.outputLines,
                     resultNumber = iperf3RunningState.intervalNumber,
                     iperf3Messages = it.iperf3Messages.toMutableList(),
                     iperf3RunningState = iperf3RunningState
@@ -250,7 +250,9 @@ class Iperf3RunViewModel() : ViewModel() {
         // Log.d(tag, "stderr: $aLine")
         _uiExecutionDataStateFlow.update { data ->
             data.copy(
-                errorLines = data.errorLines.also { it.add(aLine) },
+                errorLines =
+                    if (data.errorLines.isNotEmpty()) (data.errorLines + aLine).toMutableList()
+                    else (emptyList<String>().toMutableList() + aLine).toMutableList(),
                 iperf3RunningState = iperf3RunningState,
                 latestLine = iperf3RunningState.rawOutputLine
             )
@@ -319,9 +321,9 @@ class Iperf3RunViewModel() : ViewModel() {
             it.copy(
                 isRunning = true,
                 isFinished = false,
-                outputLines = it.outputLines.also { it.clear() },
-                errorLines = it.errorLines.also { it.clear() },
-                iperf3Messages = it.iperf3Messages.also { it.clear() },
+                outputLines = emptyList<String>().toMutableList(),
+                errorLines = emptyList<String>().toMutableList(),
+                iperf3Messages = emptyList<String>().toMutableList(),
                 results = emptyList<String>().toMutableList(),
                 bandWidth = "",
                 latestLine = "",
@@ -404,7 +406,7 @@ class Iperf3RunViewModel() : ViewModel() {
         // Provide the return code to the UI.
         if (rc != 0) {
             // Only need this on failure conditions
-            _uiExecutionDataStateFlow.update { data -> data.copy(results = data.results.also { it.add("Error: Return Code = $rc") }) }
+            _uiExecutionDataStateFlow.update { data -> data.copy(results = (data.results + "Error: Return Code = $rc").toMutableList()) }
         }
         val outputCount = _uiExecutionDataStateFlow.value.iperf3RunningState.intervalNumber
         if (outputCount > 0) {
@@ -416,14 +418,12 @@ class Iperf3RunViewModel() : ViewModel() {
             val std = getStandardDeviation(_uiExecutionDataStateFlow.value.iperf3RunningState)
             //val src = getSource(_uiExecutionDataStateFlow.value.resultData)
             //val dest = getDest(_uiExecutionDataStateFlow.value.resultData)
-            if (!exe.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(exe) }) }
-            if (!max.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(max) }) }
-            if (!min.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(min) }) }
-            if (!avg.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(avg) }) }
-            if (!med.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(med) }) }
-            if (!std.isEmpty()) _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add(std) }) }
+            val newResults = listOf(exe, max, min, avg, med, std).filter { it.isNotEmpty() }
+            if (newResults.isNotEmpty()) {
+                _uiExecutionDataStateFlow.update { it.copy(results = (it.results + newResults).toMutableList()) }
+            }
         } else {
-            _uiExecutionDataStateFlow.update { it -> it.copy(results = it.results.also { it.add("No Results") }) }
+            _uiExecutionDataStateFlow.update { it.copy(results = (it.results + "No Results").toMutableList()) }
         }
 
 
