@@ -140,7 +140,6 @@ class SampleUiState {
 
     val sampleInputData = UiInputData(
         hostName = DefaultInputData.HOST_NAME,
-        hostField = DefaultInputData.HOST_FIELD,
         durationSecs = 10,
         parallelStreams = 8,
         skip = 2,

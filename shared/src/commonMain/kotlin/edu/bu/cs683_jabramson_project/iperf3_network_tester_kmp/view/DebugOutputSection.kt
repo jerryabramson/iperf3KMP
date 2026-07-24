@@ -51,23 +51,15 @@ fun DebugOutputSection(
     val style = monoStyle.copy(fontSize = fontSize)
     val color =
         if (isOmitted) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.tertiary
-    if (outputLines.isEmpty()) {
-        Text(
-            text = "No Output",
-            textAlign = TextAlign.Left,
-            style = style,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
-        )
-    } else {
+    if (outputLines.isNotEmpty()) {
         HorizontalDivider(
             modifier = Modifier
-                .fillMaxWidth().padding(top = 5.dp, bottom = 5.dp),
-            thickness = 2.dp,
+                .fillMaxWidth().padding(start=10.dp, end=10.dp),
+                thickness = 2.dp,
             color = MaterialTheme.colorScheme.tertiary
         )
 
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(top =10.dp)) {
             val density = LocalDensity.current
             val textMeasurer = rememberTextMeasurer()
 
@@ -144,29 +136,32 @@ fun OutputBox(modifier: Modifier = Modifier,
               color: Color,
               outputLines: MutableList<String>,
               preview: Boolean = true) {
+
     Column(
-        modifier = modifier.border(width = 1.dp, color = MaterialTheme.colorScheme.tertiary)
+        modifier = modifier.border(width = 1.dp, color = MaterialTheme.colorScheme.primaryFixedDim)
     ) {
-        Text(
-            text = getHeading(preview),
-            textAlign = TextAlign.Left,
-            style = style,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth().padding(start = 10.dp, top = 4.dp, bottom = 4.dp)
-        )
-        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.tertiary)
-        LazyColumn(modifier = Modifier.padding(bottom = 2.dp)) {
-            items(outputLines.size) { index ->
-                val reverseIndex = outputLines.size - index - 1
-                val str =
-                    outputLines[reverseIndex]
-                DebugOutputItem(
-                    outputLines[reverseIndex],
-                    style = style,
-                    color = color,
-                    stalled = str.lowercase().contains("stalled"),
-                    skipped = str.lowercase().contains("skipped")
-                )
+        if (outputLines.isNotEmpty()) {
+            Text(
+                text = getHeading(preview),
+                textAlign = TextAlign.Left,
+                style = style,
+                color = MaterialTheme.colorScheme.onPrimaryFixedVariant,
+                modifier = Modifier.fillMaxWidth().padding(start = 10.dp, top = 4.dp, bottom = 4.dp)
+            )
+            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.primaryFixedDim)
+            LazyColumn(modifier = Modifier.padding(bottom = 2.dp)) {
+                items(outputLines.size) { index ->
+                    val reverseIndex = outputLines.size - index - 1
+                    val str =
+                        outputLines[reverseIndex]
+                    DebugOutputItem(
+                        outputLines[reverseIndex],
+                        style = style,
+                        color = MaterialTheme.colorScheme.primary,
+                        stalled = str.lowercase().contains("stalled"),
+                        skipped = str.lowercase().contains("omitted")
+                    )
+                }
             }
         }
     }
@@ -185,7 +180,7 @@ fun DebugOutputItem(text: String,
             textAlign = TextAlign.Left,
             modifier = Modifier.fillMaxWidth().padding(start = 10.dp),
             style = style.copy(textDecoration = if (stalled) TextDecoration.LineThrough else TextDecoration.None),
-            color = if (!stalled && !skipped) color else MaterialTheme.colorScheme.error
+            color = if (!stalled && !skipped) color else MaterialTheme.colorScheme.onErrorContainer
 
         )
     //}

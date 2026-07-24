@@ -36,6 +36,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInputData
 import org.jetbrains.compose.resources.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 /**
@@ -50,14 +51,12 @@ import org.jetbrains.compose.resources.painterResource
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())
+fun RunIperf3Screen(viewModel: Iperf3RunViewModel = viewModel { Iperf3RunViewModel() })
 {
     val uiExecutionState by viewModel.uiExecutionDataStateFlow.collectAsState()
     val uiInputState by viewModel.uiInputDataStateFlow.collectAsState()
     val monoStyle = mesloMonoTextStyle()
     val fieldColors = textFieldColors()
-    val isWide = isWideWindow()
-    val isCompact = isCompactHeight()
 
     Iperf3NetworkTesterTheme(dynamicColor = true) {
         Scaffold(
@@ -69,11 +68,11 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())
                     currentFinished = uiExecutionState.isFinished,
                     currentSaved = uiExecutionState.isSaved,
                     currentIsSaving = uiExecutionState.isSaving,
-                    isCompact = isCompact,
+                    isCompact = isCompactHeight()
                 )
             },
             bottomBar = {
-                IperfBottomBar(uiInputState, isCompact, viewModel::toggleDebug)
+                IperfBottomBar(uiInputState.isDebugging, isWide = isWideWindow(), viewModel::toggleDebug)
             }
         ) { padding ->
 
@@ -99,11 +98,8 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())
                     setSkip = viewModel::setSkip,
                     colors = fieldColors,
                     style = MaterialTheme.typography.bodySmall,
-                    isWide = isWide,
-                    isCompact = isCompact,
-
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                //Spacer(modifier = Modifier.height(10.dp))
 
                 /* Output rows */
                 RunningColumnSection(
@@ -126,8 +122,11 @@ fun RunIperf3Screen(viewModel: Iperf3RunViewModel = Iperf3RunViewModel())
                     isFinished = uiExecutionState.isFinished,
                     monoStyle = monoStyle,
                     src = getSource(uiExecutionState.iperf3RunningState),
-                    dest = getDest(uiExecutionState.iperf3RunningState))
-                IperfMessagesSection(uiState = uiExecutionState, isDebugMode = uiInputState.isDebugging)
+                    dest = getDest(uiExecutionState.iperf3RunningState),
+                    isWide = isWideWindow())
+                IperfMessagesSection(uiState = uiExecutionState,
+                    isDebugMode = uiInputState.isDebugging,
+                    isWide = isWideWindow())
                 ErrorSection(uiState = uiExecutionState, monoStyle)
                 DebugOutputSection(
                     isDebugging = uiInputState.isDebugging,
@@ -216,10 +215,18 @@ fun ScreenTestFinished() {
     ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData(), isWide = false)
 }
 
-@Preview(name = "Wide", showBackground = true, uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL, device =  Devices.TABLET, showSystemUi = true)
+@Preview(name = "Wide Dark", showBackground = true, uiMode = UI_MODE_NIGHT_YES or UI_MODE_TYPE_NORMAL, device =  Devices.TABLET, showSystemUi = true)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScreenTestWide() {
+fun ScreenTestWideDark() {
+    val sampleUiState: UiExecutionData = getSampleUiState(false)
+    ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData(), isWide = true)
+}
+
+@Preview(name = "Wide Light", showBackground = true, uiMode = UI_MODE_TYPE_NORMAL, device =  Devices.TABLET, showSystemUi = true)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScreenTestWideLigt() {
     val sampleUiState: UiExecutionData = getSampleUiState(false)
     ScreenTestScaffold(uiState = sampleUiState, inputData = getSampleInputData(), isWide = true)
 }
@@ -247,8 +254,8 @@ fun ScreenTestScaffold(uiState: UiExecutionData,
         ) {
             /* Input rows */
             Scaffold(
-                topBar = { IperfTopBar(currentRunning = uiState.isRunning,  uiState.isRunning, buttonAction = {}, saveButtonAction = {}) },
-                bottomBar = { IperfBottomBar(getSampleInputData()) {} },
+                topBar = { IperfTopBar(currentRunning = uiState.isRunning,  uiState.isRunning, isCompact = isWide, buttonAction = {}, saveButtonAction = {}) },
+                bottomBar = { IperfBottomBar(inputData.isDebugging, isWide = isWide) {} },
 
                 ) { padding ->
                 ScreenBodyPreview(
@@ -317,8 +324,7 @@ fun ScreenBodyPreview(padding: PaddingValues,
             setParallelStreams = setParallelStreams,
             setSkip = setSkip,
             colors = fieldColors,
-            style = MaterialTheme.typography.bodySmall,
-            isWide = isWide,
+            style = MaterialTheme.typography.bodySmall
         )
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -328,14 +334,14 @@ fun ScreenBodyPreview(padding: PaddingValues,
             isRunning = uiExecutionState.isRunning,
             latestLine = uiExecutionState.latestLine,
             bandWidth = uiExecutionState.bandWidth,
-            isReverse =  uiInputState.isReverse,
+            isReverse =  !uiInputState.isReverse,
             parallelStreams = uiInputState.parallelStreams,
             durationSecs = uiInputState.durationSecs,
             preview = true
         )
 
-        ResultsRow(uiState = uiExecutionState, monoStyle = monoStyle, preview = true)
-        IperfMessagesSection(uiState = uiExecutionState, isDebugMode = true)
+        ResultsRow(uiState = uiExecutionState, monoStyle = monoStyle, isWide = isWide)
+        IperfMessagesSection(uiState = uiExecutionState, isDebugMode = true, isWide = isWide)
         ErrorSection(uiState = uiExecutionState, monoStyle)
         DebugOutputSection(
             isDebugging = uiInputState.isDebugging,

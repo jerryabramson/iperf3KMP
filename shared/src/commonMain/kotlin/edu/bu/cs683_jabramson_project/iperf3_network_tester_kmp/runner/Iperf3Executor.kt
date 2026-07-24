@@ -142,9 +142,9 @@ class Iperf3Executor(
         /**
          * 4. Initialize the output monitor.
          */
-        var runningProgress = 0.0.toFloat()
+
         iperf3OutputMonitor.reset(params)
-        updateProgress(0.0.toFloat())
+        updateProgress(calcProgress(0.0.toFloat()))
 
         /**
          * 5. Create a coroutine exception handler for uncaught exceptions
@@ -239,8 +239,8 @@ private fun createIperfCallback(
 
 
 private fun calcProgress(p: Float): Float {
-    val zeroProgress = 0.0.toFloat()
-    val finishedProgress = 1.0.toFloat()
+    val zeroProgress = 0.02.toFloat()
+    val finishedProgress = 0.98.toFloat()
     var r = p
     if (p > finishedProgress) r = finishedProgress
     if (p < zeroProgress) r = zeroProgress

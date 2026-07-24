@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 //import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults.textFieldColors
@@ -21,6 +22,8 @@ import androidx.compose.runtime.Composable
 //import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 
 import androidx.compose.ui.unit.dp
@@ -63,14 +66,15 @@ fun InputFields(
     setParallelStreams: (String) -> Unit = {},
     setSkip: (String) -> Unit = {},
     colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
-    style: TextStyle = MaterialTheme.typography.bodySmall,
-    isWide: Boolean = false,
-    isCompact: Boolean = false) {
+    style: TextStyle = MaterialTheme.typography.bodySmall)
+{
+    val isWide: Boolean = isWideWindow()
+    val isCompact: Boolean = isCompactHeight()
     val valString: String
     val placeHolder: String
 
 
-    if (currentHostName.trim().isEmpty() || currentHostName.trim() == DefaultInputData.HOST_NAME.trim()) {
+    if (currentHostName.trim().isEmpty()) {
         valString = ""
         placeHolder = DefaultInputData.HOST_NAME.trim()
     } else {
@@ -89,30 +93,31 @@ fun InputFields(
                 HostField(
                     valString = valString, placeHolder = placeHolder,
                     isRunning = isRunning, colors = colors,
-                    updateHostName = updateHostName
-                )
+                    updateHostName = updateHostName,
+                    launch = launch)
                 PortField(currentPort = currentPort, isRunning = isRunning, colors = colors, setPortNumber = setPortNumber)
-                DurationField(isRunning = isRunning, colors = colors, setDuration = setDuration)
+                DurationField(currentDuration = currentDuration, isRunning = isRunning, colors = colors, setDuration = setDuration)
             }
             Row(modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
                 StreamsAndSkip(
-                    currentParallelStreams = currentParallelStreams, currentSkip = currentSkip, currentReverse = currentReverse,
+                    currentParallelStreams = currentParallelStreams,
+                    currentSkip = currentSkip, currentReverse = currentReverse,
                     colors = colors,
                     isRunning = isRunning,
-                    uploadDownload = uploadDownload, setSkip = setSkip,
+                    uploadDownload = uploadDownload, setSkip = setSkip, setParallelStreams = setParallelStreams
                 )
             }
         }
     } else {
-        val verticalPadding = if (isCompact) 2.dp else 10.dp
+        val verticalPadding = if (isCompact) 5.dp else 10.dp
         Row(
             modifier = Modifier.padding(top = verticalPadding, bottom = verticalPadding, start =  10.dp),//.fillMaxWidth().
         ) {
             HostField(
                 valString = valString, placeHolder = placeHolder,
                 isRunning = isRunning, colors = colors,
-                updateHostName = updateHostName
-            )
+                updateHostName = updateHostName,
+                launch = launch)
             PortField(currentPort = currentPort, isRunning = isRunning, colors = colors, setPortNumber = setPortNumber)
             DurationField(currentDuration = currentDuration, setDuration = setDuration, isRunning = isRunning, colors = colors)
             StreamsAndSkip(
@@ -122,7 +127,8 @@ fun InputFields(
                 isRunning = isRunning,
                 uploadDownload = uploadDownload,
                 setSkip = setSkip,
-                colors = colors
+                colors = colors,
+                setParallelStreams = setParallelStreams
             )
         }
     }
@@ -135,11 +141,12 @@ fun InputFields(
 fun StreamsAndSkip(currentParallelStreams: Int, currentSkip: Int, currentReverse: Boolean, isRunning: Boolean,
                    uploadDownload: (String) -> Unit,
                    setSkip: (String) -> Unit,
+                   setParallelStreams: (String) -> Unit,
                    colors: androidx.compose.material3.TextFieldColors = textFieldColors()) {
     GenericNumericField(
         currentValue = currentParallelStreams,
-        onValueChange = {},
-        enabled = true,
+        onValueChange = setParallelStreams,
+        enabled = !isRunning,
         defaultValue = DefaultInputData.PARALLEL_STREAMS,
         label = "Streams",
         modifier = Modifier.width(width = 130.dp).padding(end = 8.dp),
@@ -160,9 +167,11 @@ fun StreamsAndSkip(currentParallelStreams: Int, currentSkip: Int, currentReverse
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HostField(valString: String = "", placeHolder: String = "", colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
+fun HostField(valString: String = "", placeHolder: String = "",
+              colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
               isRunning: Boolean = true,
-              updateHostName: (String) -> Unit = {})
+              updateHostName: (String) -> Unit = {},
+              launch: () -> Unit = {})
 {
     TextField(
         value = valString,
@@ -172,7 +181,7 @@ fun HostField(valString: String = "", placeHolder: String = "", colors: androidx
             Text(
                 text = placeHolder,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         modifier = Modifier.width(width = 180.dp)
@@ -185,11 +194,11 @@ fun HostField(valString: String = "", placeHolder: String = "", colors: androidx
         },
         colors = colors,
         singleLine = true,
-//keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { launch() }),
-//keyboardOptions = KeyboardOptions(
-//    keyboardType = KeyboardType.Uri,
-//    imeAction = ImeAction.Done
-//)
+        keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { launch() }),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Uri,
+            imeAction = ImeAction.Done
+        )
     )
 }
 
@@ -212,7 +221,8 @@ fun PortField(currentPort: Int = 0, isRunning: Boolean = true, colors: androidx.
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DurationField(currentDuration: Int = 0, isRunning: Boolean = true, colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
+fun DurationField(currentDuration: Int = 0, isRunning: Boolean = true,
+                  colors: androidx.compose.material3.TextFieldColors = textFieldColors(),
                   setDuration: (String) -> Unit = {}, ) {
     GenericNumericField(
         currentValue = currentDuration,

@@ -84,7 +84,7 @@ class Iperf3OutputMonitor {
                         currentIperf3RunningState.timeout = restOfLine[6].trim()
                         val localHostPort =  formatString("%s:%-5d",currentIperf3RunningState.localHost, currentIperf3RunningState.localPort)
                         val remoteHostPort = formatString("%s:%-5d", currentIperf3RunningState.remoteHost, currentIperf3RunningState.remotePort)
-                        currentIperf3RunningState.localHostDetails = "Local Host:port $localHostPort"
+                        currentIperf3RunningState.localHostDetails =  " Local Host:port $localHostPort"
                         currentIperf3RunningState.remoteHostDetails = "Remote Host:port $remoteHostPort"
                         currentIperf3RunningState.rawLocalHostDetails = localHostPort
                         currentIperf3RunningState.rawRemoteHostDetails = remoteHostPort
@@ -120,10 +120,10 @@ class Iperf3OutputMonitor {
                             when (sendOrReceive.lowercase()) {
                                 "(omitted)" -> {
                                     lastOmitted = true
-                                    timeLabel = "skipped"
+                                    timeLabel = "omitted"
                                     currentIperf3RunningState.totalOmitted++
                                     currentIperf3RunningState.omitted = true
-                                    currentIperf3RunningState.basicBandWidthString = "${currentIperf3RunningState.basicBandWidthString} (omitted)"
+                                    currentIperf3RunningState.basicBandWidthString = "${currentIperf3RunningState.basicBandWidthString} (${currentIperf3RunningState.totalOmitted} omitted)"
                                 }
 
                                 "sender", "receiver" -> {

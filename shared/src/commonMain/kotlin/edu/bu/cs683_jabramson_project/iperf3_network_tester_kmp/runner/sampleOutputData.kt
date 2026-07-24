@@ -356,8 +356,6 @@ class SampleOutputData {
         "[SUM]   0.00-30.00  sec  8.22 GBytes  2.35 Gbits/sec   25             sender",
         "[SUM]   0.00-30.00  sec  8.22 GBytes  2.35 Gbits/sec                  receiver",
         "",
-        "iperf Done.",
-        "{iPerf JNI} 🚀 Test completed successfully."
     ).toMutableList()
 }
 

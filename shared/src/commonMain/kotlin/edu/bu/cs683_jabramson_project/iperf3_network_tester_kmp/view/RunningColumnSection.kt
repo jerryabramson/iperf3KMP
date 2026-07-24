@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.WavyProgressIndicatorDefaults.trackColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +29,7 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.model.Iperf3Runn
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.UnitConvertedData
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.utils.toWholeNumber
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExecutionData
+import kotlinx.coroutines.NonCancellable.isActive
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,20 +57,15 @@ fun RunningColumnSection(
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
         LaunchingMessage(latestLine.isEmpty())
-        val (barColor, trackColor) = progressColors(isReverse)
 
         if (bandWidth.isNotEmpty()) {
-            //ProgressPercent(uiInputData, uiState)
-
-            ProgressPercent(isOmitted = isOmitted, isReverse = isReverse, parallelStreams = parallelStreams, durationSecs = durationSecs, progress = progress, intervalNumber = interval)
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier.fillMaxWidth().height(10.dp),
-                color = barColor,
-                trackColor = trackColor,
-                strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+            ProgressPercent(
+                isOmitted = isOmitted, isReverse = isReverse,
+                parallelStreams = parallelStreams, durationSecs = durationSecs,
+                progress = progress, intervalNumber = interval,
+                bandWidth = bandWidth,
+                max= max, min = min, avg = avg, preview = preview
             )
-            BandwidthDisplay(min = min, max = max, avg = avg, preview = preview, basicBandWidthString = bandWidth)
         }
     }
 }
@@ -80,10 +79,6 @@ private fun LaunchingMessage(show: Boolean) {
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
         )
-        HorizontalDivider(
-            thickness = 10.dp,
-            color = MaterialTheme.colorScheme.surfaceVariant
-        )
     }
 }
 
@@ -91,7 +86,7 @@ private fun LaunchingMessage(show: Boolean) {
 @Composable
 fun progressColors(isReverse: Boolean): Pair<androidx.compose.ui.graphics.Color, androidx.compose.ui.graphics.Color> {
     return if (!isReverse) {
-        MaterialTheme.colorScheme.error to MaterialTheme.colorScheme.surfaceDim
+        MaterialTheme.colorScheme.onErrorContainer to MaterialTheme.colorScheme.surfaceDim
     } else {
         MaterialTheme.colorScheme.surfaceDim to MaterialTheme.colorScheme.primary
     }
@@ -105,33 +100,50 @@ fun ProgressPercent(isOmitted: Boolean = getSampleUiState().iperf3RunningState.o
                     parallelStreams: Int = getSampleInputData().parallelStreams,
                     durationSecs: Int = getSampleInputData().durationSecs,
                     intervalNumber: Long = getSampleUiState().iperf3RunningState.intervalNumber,
-                    progress: Float = getSampleUiState().progress)
-{
+                    progress: Float = getSampleUiState().progress,
+                    bandWidth: String = getSampleUiState().bandWidth,
+                    max: UnitConvertedData= getSampleUiState().iperf3RunningState.currentMax,
+                    min: UnitConvertedData = getSampleUiState().iperf3RunningState.currentMin,
+                    avg: UnitConvertedData = getSampleUiState().iperf3RunningState.currentAvg,
+                    preview: Boolean = true) {
+    val (barColor, trackColor) = progressColors(isReverse)
     if (!isOmitted) {
         val num = if (isReverse) (1f - progress) else progress
         val percent = (num * 100).toInt()
 
         //@SuppressLint("DefaultLocale")
-        val iter = "iteration ${intervalNumber} of ${durationSecs}"
+        val iter = "iteration $intervalNumber of $durationSecs"
         Text(
             text = "${percent}% complete : $iter [$parallelStreams streams]",
             modifier = Modifier.fillMaxWidth(),
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
         )
-    } else {
-        Text(
-            text = "Omitted Result",
-            modifier = Modifier.fillMaxWidth(),
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center,
-            color =  MaterialTheme.colorScheme.error
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.fillMaxWidth().height(5.dp),
+            color = barColor,
+            trackColor = trackColor,
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
         )
+        BandwidthDisplay(min = min, max = max, avg = avg, preview = preview, basicBandWidthString = bandWidth)
 
+    } else {
+        Column(modifier = Modifier.fillMaxWidth().padding(start=10.dp, end =  10.dp)) {
+            Text(
+                text = bandWidth,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.error
+            )
+            CircularProgressIndicator(
+                strokeWidth = 2.dp,
+                modifier = Modifier.align(Alignment.CenterHorizontally).size(10.dp),
+            )
+        }
     }
 }
-
-
 
 @Composable
 fun BandwidthDisplay(omittedResult: Boolean = false,
@@ -172,7 +184,7 @@ fun BandwidthDisplay(omittedResult: Boolean = false,
             Text(
                 text = "Min",
                 color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelSmall
             )
 //            Text(
 //                text = "Mean",
@@ -182,12 +194,12 @@ fun BandwidthDisplay(omittedResult: Boolean = false,
             Text(
                 text = "Avg",
                 color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelSmall
             )
             Text(
                 text = "Max",
                 color = MaterialTheme.colorScheme.secondary,
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelSmall
             )
 
         }
@@ -200,7 +212,7 @@ fun BandwidthDisplay(omittedResult: Boolean = false,
             Text(
                 text = toWholeNumber(min, preview).trim(),
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodySmall
             )
 //            Text(
 //                text = toWholeNumber(med, preview),
@@ -210,12 +222,12 @@ fun BandwidthDisplay(omittedResult: Boolean = false,
             Text(
                 text = toWholeNumber(avg, preview),
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodySmall
             )
             Text(
                 text = toWholeNumber(max, preview),
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }

@@ -3,9 +3,9 @@ package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.ui.theme
 import androidx.compose.ui.graphics.Color
 
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val Purple90 = Color(0xFFDFFCFF)
+val PurpleGrey90 = Color(0xFFFFF2FC)
+val Pink80 = Color(0xFFF0F0F0)
 val Red80 = Color(0xAAA000FF)
 val Red90 = Color(0xFFF00000)
 val Red70 = Color(0xCCCC0000)

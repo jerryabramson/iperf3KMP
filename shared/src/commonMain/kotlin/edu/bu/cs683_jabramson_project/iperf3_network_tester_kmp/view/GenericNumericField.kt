@@ -3,6 +3,7 @@ package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 //import android.R.attr.defaultValue
 //import android.R.attr.enabled
 //import android.R.attr.label
+import androidx.collection.emptyLongSet
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults.textFieldColors
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +46,7 @@ fun GenericNumericField(
         placeholder = {
             Text(text = placeHolder,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.tertiary)
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
         },
         modifier = modifier,
         label = {

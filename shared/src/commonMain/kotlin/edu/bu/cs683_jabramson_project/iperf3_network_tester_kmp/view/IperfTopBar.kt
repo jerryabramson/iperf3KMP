@@ -1,7 +1,10 @@
 package edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -39,8 +42,9 @@ fun IperfTopBar(
         modifier = barModifier,
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
+
 
         navigationIcon = {
             SaveButton(
@@ -53,13 +57,12 @@ fun IperfTopBar(
         },
         title = {
             Row(
-                modifier = Modifier
-                    //.background(color = MaterialTheme.colorScheme.onPrimaryContainer)
+                   //.background(color = MaterialTheme.colorScheme.onPrimaryContainer)
                     //.padding(start = 20.dp, end = 20.dp),
             )
             {
                 Text(
-                    style = if (isCompact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.titleMedium,
+                    style = if (isCompact) MaterialTheme.typography.bodySmall else MaterialTheme.typography.titleMedium,
                     text =  "iperf3 Network Tester",
                     maxLines = 1,
                     //text = stringResource(

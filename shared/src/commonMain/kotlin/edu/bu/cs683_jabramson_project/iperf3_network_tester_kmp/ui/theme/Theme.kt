@@ -18,32 +18,32 @@ import androidx.compose.runtime.Composable
 //import androidx.room.ForeignKey
 
 val DarkColorScheme = darkColorScheme(
- //   primary = Purple80,
-//    secondary = PurpleGrey80,
-//    tertiary = Pink80,
-//    onError = Red40,
-//    background = White,
-//    onErrorContainer = BrightRed,
-    //surfaceDim = Grey80
+    primary = Purple40,
+    secondary = PurpleGrey40,
+    tertiary = Pink40,
+    onError = Purple40,
+    background = Black,
+    onErrorContainer = Red90,
+    surfaceDim =  Grey40
 )
 
  val LightColorScheme = lightColorScheme(
- //    primary = Purple40,
- //    secondary = PurpleGrey40,
- //    tertiary = Pink40,
- //    onError = Purple40,
- //    background = Black,
- //    onErrorContainer = Red90,
-     //surfaceDim =  Grey40
+     primary = Black,
+     secondary = PurpleGrey90,
+     tertiary = Pink80,
+     onError = Red40,
+     background = White,
+     onErrorContainer = BrightRed,
+     surfaceDim = Grey80
 
-    /* Other default colors to override */
-    /*surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+     /* Other default colors to override */
+//   surface = Color(0xFFFFFBFE),
+//   onPrimary = Color.White,
+//   onSecondary = Color.White,
+//   onTertiary = Color.White,
+//   onBackground = Color(0xFF1C1B1F),
+//   onSurface = Color(0xFF1C1B1F),
+
 )
 
 @Composable

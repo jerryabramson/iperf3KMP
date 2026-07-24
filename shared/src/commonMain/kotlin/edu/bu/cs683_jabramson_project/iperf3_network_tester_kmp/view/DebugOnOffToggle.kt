@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -23,37 +24,38 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiInpu
 @Preview(name ="DebugOnOffRadioButtonPreview", showBackground = true, device = Devices.PIXEL_9, showSystemUi = true)
 @Composable
 fun DebugOnOffToggle(
-    currentDebugging: Boolean = getSampleInputData().isDebugging,
+    currentDebugging: Boolean = false, //getSampleInputData().isDebugging,
     toggleDebug: () -> Unit = {},
-    isCompact: Boolean = false
+    isWide: Boolean = false
 ) {
-    val buttonColor = if (!currentDebugging) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
-    if (!isCompact) {
+    val buttonColor = if (currentDebugging) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
+
+    if (!isWide) {
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 text = "iperf3 Output",
                 modifier = Modifier.padding(end = 10.dp),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodyMedium,
             )
             Button(
                 onClick = toggleDebug, // 1. Flip state on click
                 colors = ButtonDefaults.buttonColors(
                     containerColor = buttonColor
                 ),
-                shape = MaterialTheme.shapes.small,
-                modifier = Modifier.padding(1.dp)//.width(240.dp).height(50.dp)
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.padding(1.dp).width(90.dp).height(60.dp)
             ) {
                 if (currentDebugging) {
                     Text(
-                        text = "Turn Off",
-                        color = MaterialTheme.colorScheme.surface,
-                        style = MaterialTheme.typography.labelSmall,
+                        text = "OFF",
+                        color = MaterialTheme.colorScheme.inversePrimary,
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 } else {
                     Text(
-                        text = "Turn On",
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        style = MaterialTheme.typography.labelSmall
+                        text = "ON",
+                        color = MaterialTheme.colorScheme.surface,
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }
@@ -79,15 +81,15 @@ fun DebugOnOffToggle(
             ) {
                 if (currentDebugging) {
                     Text(
-                        text = "Turn Off",
-                        color = MaterialTheme.colorScheme.surface,
-                        style = mesloMonoTextStyle().copy(fontSize = 9.sp),
+                        text = "OFF",
+                        color = MaterialTheme.colorScheme.inversePrimary,
+                        style = mesloMonoTextStyle().copy(fontSize = 12.sp),
                     )
                 } else {
                     Text(
-                        text = "Turn On",
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        style = mesloMonoTextStyle().copy(fontSize = 9.sp),
+                        text = "ON",
+                        color = MaterialTheme.colorScheme.surface,
+                        style = mesloMonoTextStyle().copy(fontSize = 12.sp),
                     )
                 }
             }

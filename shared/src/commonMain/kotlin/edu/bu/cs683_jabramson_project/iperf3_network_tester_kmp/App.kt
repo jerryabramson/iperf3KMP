@@ -5,7 +5,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.ui.theme.Iperf3NetworkTesterTheme
 import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.view.RunIperf3Screen
-import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3RunViewModel
 
 @Composable
 @Preview(name = "App",
@@ -15,6 +14,6 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.Iperf3
 
 fun App() {
     Iperf3NetworkTesterTheme {
-        RunIperf3Screen(viewModel = Iperf3RunViewModel())
+        RunIperf3Screen()
     }
 }

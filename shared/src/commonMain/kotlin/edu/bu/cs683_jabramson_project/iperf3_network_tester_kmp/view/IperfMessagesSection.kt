@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,26 +32,27 @@ import edu.bu.cs683_jabramson_project.iperf3_network_tester_kmp.viewmodel.UiExec
 fun IperfMessagesSection(
     isDebugMode: Boolean = true,
     uiState: UiExecutionData = getSampleUiState(),
-    monoStyle: TextStyle = mesloMonoTextStyle()
+    monoStyle: TextStyle = mesloMonoTextStyle(),
+    isWide: Boolean = true,
 ) {
     val isActive = (uiState.isRunning && !uiState.isFinished && uiState.latestLine.isEmpty())
     val isErrors = uiState.errorLines.isNotEmpty()
-    val fontSize = 12.sp
+    val fontSize = if (!isWide) 12.sp else 8.sp
     val style = monoStyle.copy(fontSize = fontSize)
-    Column(modifier = Modifier.fillMaxWidth()) {
+    val maxHeight = if (isWide) 48.dp else 100.dp
+    Column(modifier = Modifier.fillMaxWidth().padding(start=10.dp, end =  10.dp)) {
         if (isDebugMode || isActive || isErrors)
         {
-            val defaultColor = if (uiState.returnCode != 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            val defaultColor = if (uiState.returnCode != 0)
+                MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
             val defaultThickness = if (uiState.returnCode != 0) 4.dp else 1.dp
-            HorizontalDivider(
-                thickness = defaultThickness,
-                color = defaultColor
-            )
             if (uiState.iperf3Messages.isNotEmpty()) {
+                HorizontalDivider(thickness = defaultThickness, color = defaultColor)
+
                 // Capped so this can't silently claim all remaining vertical space
                 // in the non-scrolling parent Column the way an unbounded
                 // LazyColumn otherwise would -- it scrolls within the cap instead.
-                LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 48.dp)) {
+                LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
                     items(uiState.iperf3Messages.size) { index ->
                         IperfMessageItem(uiState.iperf3Messages[index], style)
                     }
@@ -59,7 +61,7 @@ fun IperfMessagesSection(
 
             if (isActive && !isErrors) {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally).size(16.dp),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).size(16.dp).padding(top = 2.dp),
                     strokeWidth = 2.dp
                 )
             }

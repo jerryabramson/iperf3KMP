@@ -22,26 +22,26 @@ import androidx.compose.ui.tooling.preview.Preview
  */
 @Preview(name =  "Run Button", showBackground = true, device = PIXEL_6, showSystemUi = true)
 @Composable
-fun RunButton(isRunning: Boolean = true,
+fun RunButton(isRunning: Boolean = false,
               buttonAction: () -> Unit = {},
               isCompact: Boolean = false)
 {
-    var buttonColor = MaterialTheme.colorScheme.primary
-    if (isRunning) buttonColor = MaterialTheme.colorScheme.onErrorContainer
+    val buttonColor = if (!isRunning) MaterialTheme.colorScheme.onTertiaryContainer
+    else MaterialTheme.colorScheme.onErrorContainer
     Button(
         // Button's default min-height (40dp) doesn't shrink to fit a tight top
         // bar -- it just gets clipped, text and all. Override explicitly.
         modifier = if (isCompact) Modifier.height(28.dp) else Modifier.padding(end = 10.dp),
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.small,
         onClick =  buttonAction,
         colors = ButtonDefaults.buttonColors(
             containerColor = buttonColor
         ),
-        contentPadding = if (isCompact) PaddingValues(horizontal = 8.dp, vertical = 2.dp) else ButtonDefaults.ContentPadding
+        contentPadding = if (isCompact) PaddingValues(horizontal = 2.dp, vertical = 2.dp) else ButtonDefaults.ContentPadding
     ) {
-        val style = if (isCompact) mesloMonoTextStyle().copy(fontSize = 9.sp) else MaterialTheme.typography.labelLarge
+        val style = if (isCompact) mesloMonoTextStyle().copy(fontSize = 8.sp) else MaterialTheme.typography.labelLarge
         if (!isRunning) {
-            Text(text = "Run", color = MaterialTheme.colorScheme.surface, style = style)
+            Text(text = "Run", color = MaterialTheme.colorScheme.primaryContainer, style = style)
         } else {
             Text(text = "Stop", color = MaterialTheme.colorScheme.surface, style = style)
         }

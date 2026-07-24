@@ -55,7 +55,6 @@ object UploadDownload {
 
 object DefaultInputData {
     const val HOST_NAME = "jabramson.com"
-    const val HOST_FIELD = "jabramson.com"
     const val PORT_NUMBER = 5201
     const val PARALLEL_STREAMS = 8
     const val DURATION = 10
@@ -67,9 +66,8 @@ object DefaultInputData {
 }
 
 data class UiInputData(
-    val hostName: String = DefaultInputData.HOST_NAME,
+    val hostName: String = "",
     val portNumber: Int = -1,
-    val hostField: String = DefaultInputData.HOST_FIELD,
     val durationSecs: Int = -1,
     val parallelStreams: Int = -1,
     val skip: Int = -1,
@@ -170,7 +168,6 @@ class Iperf3RunViewModel() : ViewModel() {
             it.copy(
                 hostName = "",
                 portNumber = -1,
-                hostField = "",
                 skip = -1,
                 durationSecs = -1,
                 parallelStreams = -1,
@@ -294,18 +291,11 @@ class Iperf3RunViewModel() : ViewModel() {
      * Launch the iperf3 binary (notice that this is an asynchronous operation).
      */
     fun launch() {
-        val tempHostName = _uiInputDataStateFlow.value.hostName.ifEmpty { DefaultInputData.HOST_NAME }
-        val tempPortNumber =
-            if (_uiInputDataStateFlow.value.portNumber == -1)
-                DefaultInputData.PORT_NUMBER
-            else _uiInputDataStateFlow.value.portNumber
-        val tempHostField = "${tempHostName}:${tempPortNumber}"
         _uiInputDataStateFlow.update {
             it.copy(
                 // Ensure the user can see selections during the run
-                hostName = tempHostName,
-                portNumber = tempPortNumber,
-                hostField = tempHostName,
+                hostName = if (it.hostName.trim().isEmpty()) DefaultInputData.HOST_NAME else it.hostName,
+                portNumber = if (it.portNumber == -1) DefaultInputData.PORT_NUMBER else it.portNumber,
                 durationSecs = if (it.durationSecs == -1) DefaultInputData.DURATION else it.durationSecs,
                 parallelStreams = if (it.parallelStreams == -1) DefaultInputData.PARALLEL_STREAMS else it.parallelStreams,
                 skip = if (it.skip == -1) DefaultInputData.SKIP else it.skip,
@@ -382,7 +372,7 @@ class Iperf3RunViewModel() : ViewModel() {
     fun cancelTest(): Int {
         var rc: Int
         try {
-            rc = -1 //iperfManager.cancelTest()
+            rc = iperf3Executor.cancelTest()
         } catch (e: Exception) {
             /* Shouldn't ever get here, since guards are already in place */
             //e(tag, "Failed to cancel iperf3: ${e.message}", e)
@@ -444,7 +434,6 @@ class Iperf3RunViewModel() : ViewModel() {
         _uiInputDataStateFlow.update {
             it.copy(
                 hostName = if (it.hostName != DefaultInputData.HOST_NAME) it.hostName else "",
-                hostField = if (it.hostField != DefaultInputData.HOST_FIELD) it.hostField else "",
                 skip = if (it.skip != DefaultInputData.SKIP) it.skip else -1,
                 durationSecs = if (it.durationSecs != DefaultInputData.DURATION) it.durationSecs else -1,
                 parallelStreams = if (it.parallelStreams != DefaultInputData.PARALLEL_STREAMS) it.parallelStreams else -1,
@@ -471,20 +460,19 @@ class Iperf3RunViewModel() : ViewModel() {
 
     /**
      * User entered a new host name.
-     * @param hostField The new host name.
+     * @param hostName The new host name.
      */
-    fun setHostName(hostField: String) {
-        if (!hostField.isEmpty()) {
+    fun setHostName(hostName: String) {
+        if (hostName.trim().isNotEmpty()) {
             _uiInputDataStateFlow.update {
                 it.copy(
-                    hostField = hostField,
-                    hostName = hostField
+                    hostName = hostName.trim(),
                 )
             }
         } else {
             // Reset to base state if user clears field
             _uiInputDataStateFlow.update {
-                it.copy(hostField = "", hostName = "")
+                it.copy(hostName = "")
             }
         }
     }
